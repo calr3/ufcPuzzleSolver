@@ -44,10 +44,8 @@ public class Main {
   }
 
   public static void main(String[] args) throws IOException {
-    ImmutableList<Card> cards;
-    try (Stream<String> lines = Files.lines(FileSystems.getDefault().getPath("C:\\Users\\Charlie\\Downloads\\ufc cards - Sheet1 (3).csv"))) {
-      cards = lines.skip(1).map(Main::parseCard).collect(toImmutableList());
-    }
+    ImmutableList<Card> cards =
+        new CardFileParser(FileSystems.getDefault().getPath(args[0])).load();
     List<Card> strikingCards = cards.stream().filter(card -> card.getMoveType().isStriking()).collect(toList());
     List<Card> grapplingCards = cards.stream().filter(card -> !card.getMoveType().isStriking()).collect(toList());
 
@@ -115,72 +113,5 @@ public class Main {
     System.out.println(bestEver.getDescription());
     System.out.println(bestEver.getNaughtiness());
     System.out.println(bestEver.getLongDescription());
-  }
-
-  private static int INDEX = 0;
-
-  private static Card parseCard(String line) {
-    String[] parts = line.split(",");
-    return new Card(
-        INDEX++,
-        parseWeight(parts[1]),
-        parseStyle(parts[2]),
-        parseType(parts[3]),
-
-        parseSkill(parts[5]),
-        parseSkill(parts[6]),
-        parseLevel(parts[7])
-   );
-  }
-
-  private static Weight parseWeight(String raw) {
-    if (raw.equals("LW")) {
-      return Weight.LW;
-    } else if (raw.equals("MW")) {
-      return Weight.MW;
-    } else if (raw.equals("HW")) {
-      return Weight.HW;
-    } else if (raw.equals("BW")) {
-      return Weight.BW;
-    }
-
-    throw new IllegalArgumentException("Bad weight " + raw);
-  }
-
-  private static MoveType parseType(String raw) {
-    for (MoveType moveType : MoveType.values()) {
-      if (moveType.name().equalsIgnoreCase(raw)) {
-        return moveType;
-      }
-    }
-
-    throw new IllegalArgumentException("Bad type " + raw);
-  }
-
-  private static Style parseStyle(String raw) {
-    if (raw.equals("Bal")) {
-      return Style.BALANCED;
-    } else if (raw.equals("Gra")) {
-      return Style.GRAPPLER;
-    } else if (raw.equals("Bra")) {
-      return Style.BRAWLER;
-    } else if (raw.equals("SPC")) {
-      return Style.SPECIALIST;
-    } else if (raw.equals("Str")) {
-      return Style.STRIKER;
-    }
-
-    throw new IllegalArgumentException("Bad style " + raw);
-  }
-
-  private static int parseSkill(String raw) {
-    return raw.isEmpty() ? 0 : Integer.parseInt(raw);
-  }
-
-  private static Level parseLevel(String raw) {
-    return Arrays.stream(Level.values())
-        .filter(level -> level.name().charAt(0) == raw.charAt(0))
-        .findAny()
-        .orElseThrow();
   }
 }

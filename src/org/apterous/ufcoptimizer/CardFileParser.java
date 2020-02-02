@@ -1,0 +1,103 @@
+package org.apterous.ufcoptimizer;
+
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
+
+import static com.google.common.collect.ImmutableList.toImmutableList;
+
+/** Parse the file at a given path into a list of cards. */
+final class CardFileParser {
+
+  private final Path filePath;
+
+  /** Construct a new instance to parse the given path. */
+  CardFileParser(Path filePath) {
+    this.filePath = Preconditions.checkNotNull(filePath);
+  }
+
+  /**
+   * Returns the list of cards in the order they occur in the file.
+   *
+   * <p>Indices are contiguous starting from 0.
+   */
+  ImmutableList<Card> load() throws IOException {
+    AtomicInteger index = new AtomicInteger(0);
+    try (Stream<String> lines = Files.lines(filePath)) {
+      return lines
+          .skip(1)
+          .map(line -> parseCard(index.incrementAndGet(), line))
+          .collect(toImmutableList());
+    }
+  }
+
+  private Card parseCard(int index, String line) {
+    String[] parts = line.split(",");
+    return new Card(
+        index,
+        parseWeight(parts[1]),
+        parseStyle(parts[2]),
+        parseType(parts[3]),
+        parseSkill(parts[5]),
+        parseSkill(parts[6]),
+        parseLevel(parts[7])
+    );
+  }
+
+  private static Weight parseWeight(String raw) {
+    if (raw.equals("LW")) {
+      return Weight.LW;
+    } else if (raw.equals("MW")) {
+      return Weight.MW;
+    } else if (raw.equals("HW")) {
+      return Weight.HW;
+    } else if (raw.equals("BW")) {
+      return Weight.BW;
+    }
+
+    throw new IllegalArgumentException("Bad weight " + raw);
+  }
+
+  private static MoveType parseType(String raw) {
+    for (MoveType moveType : MoveType.values()) {
+      if (moveType.name().equalsIgnoreCase(raw)) {
+        return moveType;
+      }
+    }
+
+    throw new IllegalArgumentException("Bad type " + raw);
+  }
+
+  private static Style parseStyle(String raw) {
+    if (raw.equals("Bal")) {
+      return Style.BALANCED;
+    } else if (raw.equals("Gra")) {
+      return Style.GRAPPLER;
+    } else if (raw.equals("Bra")) {
+      return Style.BRAWLER;
+    } else if (raw.equals("SPC")) {
+      return Style.SPECIALIST;
+    } else if (raw.equals("Str")) {
+      return Style.STRIKER;
+    }
+
+    throw new IllegalArgumentException("Bad style " + raw);
+  }
+
+  private static int parseSkill(String raw) {
+    return raw.isEmpty() ? 0 : Integer.parseInt(raw);
+  }
+
+  private static Level parseLevel(String raw) {
+    return Arrays.stream(Level.values())
+        .filter(level -> level.name().charAt(0) == raw.charAt(0))
+        .findAny()
+        .orElseThrow();
+  }
+}

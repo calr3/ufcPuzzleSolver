@@ -4,7 +4,7 @@ import javax.annotation.concurrent.Immutable;
 
 /** An immutable representation of a card in the game. */
 @Immutable
-public class Card {
+final class Card {
 
   private final int id;
   private final Weight weight;
