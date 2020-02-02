@@ -1,75 +1,55 @@
 package org.apterous.ufcoptimizer;
 
+import com.google.common.base.Preconditions;
+
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
-
-import static org.apterous.ufcoptimizer.MoveType.ARM;
-import static org.apterous.ufcoptimizer.MoveType.CLINCH;
-import static org.apterous.ufcoptimizer.MoveType.GROUND;
-import static org.apterous.ufcoptimizer.MoveType.LEG;
-import static org.apterous.ufcoptimizer.MoveType.SUBMISSION;
-import static org.apterous.ufcoptimizer.MoveType.TAKEDOWN;
+import java.util.stream.IntStream;
 
 /** A mutable representation of the cards actually assigned. */
 public class Selection {
 
-  private static final int TARGET_CHEMISTRY = 75;
-  private static final int TARGET_HEAD_MOVEMENT = 100;
-  private static final int TARGET_THROW_SKILL = 95;
-  private static final int TARGET_SILVERS = 1;
+  private final Puzzle puzzle;
+  private final Card[] cards; // TODO: use two arrays.
+  private final MoveType[] moveSlotTypes;
 
-  private static final MoveType[] STYLE_TARGETS = {
-      ARM, ARM, ARM,
-      LEG, LEG, LEG,
-      CLINCH, CLINCH,
-      TAKEDOWN, TAKEDOWN,
-      SUBMISSION, SUBMISSION,
-      GROUND, GROUND,
-  };
-  public static final int TOTAL_SLOTS = STYLE_TARGETS.length;
-  public static final int STRIKING_SLOTS =
-      (int) Arrays.stream(STYLE_TARGETS).filter(MoveType::isStriking).count();
-  public static final int GRAPPLING_SLOTS = TOTAL_SLOTS - STRIKING_SLOTS;
-
-  private final Card[] cards;
   private final BitSet used;
+  private int chemistry;
+  private int headMovement;
+  private int throwSkill;
+  private int silvers;
 
-  private int chemistry = 0;
-  private int headMovement = 75;  // Default value. Ceck
-  private int throwSkill = 74;  // Default value
-  private int silvers = 0;
+  public Selection(Puzzle puzzle) {
+    this.puzzle = Preconditions.checkNotNull(puzzle);
+    this.cards = new Card[puzzle.getMoveSlotCount()];
+    // Order can be arbitrary as long as striking slots are first.
+    this.moveSlotTypes =
+        puzzle.getMoveSlots().stream()
+            .sorted((slotA, slotB) -> Boolean.compare(slotB.isStriking(), slotA.isStriking()))
+            .collect(Collectors.toList())
+            .toArray(new MoveType[0]);
 
-  public Selection(List<Card> availableCards) {
-    cards = new Card[STYLE_TARGETS.length];
-    used = new BitSet(availableCards.size());
+    this.used = new BitSet(puzzle.getAvailableCards().size());
+    this.chemistry = 0;
+    this.headMovement = puzzle.getInitialHeadMovement();
+    this.throwSkill = puzzle.getInitialThrowSkill();
+    this.silvers = 0;
   }
 
   public Selection(Selection selection) {
+    puzzle = selection.puzzle;
     cards = selection.cards.clone();
+    moveSlotTypes = selection.moveSlotTypes.clone();
+
     used = (BitSet) selection.used.clone();
     chemistry = selection.chemistry;
     headMovement = selection.headMovement;
     throwSkill = selection.throwSkill;
     silvers = selection.silvers;
-  }
-
-  public void verifyStartingState() {
-    if (chemistry != 76) {
-      throw new IllegalArgumentException("nope 1");
-    }
-    if (throwSkill != 95) {
-      throw new IllegalArgumentException("nope 2: " + throwSkill);
-    }
-    if (headMovement != 100) {
-      throw new IllegalArgumentException("nope 3");
-    }
-    if (silvers != 2) {
-      throw new IllegalArgumentException("nope 4");
-    }
-  }
+}
 
   @Override
   public String toString() {
@@ -84,25 +64,28 @@ public class Selection {
   }
 
   public String getLongDescription() {
-    return Arrays.stream(cards)
-        .map(card -> card == null ? "___" : card.toString())
+    return IntStream.range(0, cards.length)
+        .mapToObj(
+            cardIndex -> String.format("%s: %s",
+                moveSlotTypes[cardIndex],
+                cards[cardIndex] == null ? "___" : cards[cardIndex].toString()))
         .collect(Collectors.joining("\n"))
         + "\n\n"
         + (isSolved() ? "Solved" : "Unsolved");
   }
 
   public Card setStriking(int index, Card newCard) {
-    if (index < 0 || index >= STRIKING_SLOTS || (newCard != null && !newCard.getMoveType().isStriking())) {
+    if (index < 0 || index >= puzzle.getStrikingSlotCount() || (newCard != null && !newCard.getMoveType().isStriking())) {
       throw new IllegalArgumentException();
     }
     return set(index, newCard);
   }
 
   public Card setGrappling(int index, Card newCard) {
-    if (index < 0 || index >= GRAPPLING_SLOTS || (newCard != null && newCard.getMoveType().isStriking())) {
+    if (index < 0 || index >= puzzle.getGrapplingSlotCount() || (newCard != null && newCard.getMoveType().isStriking())) {
       throw new IllegalArgumentException(String.format("Can't set %s to %s", newCard, index));
     }
-    return set(STRIKING_SLOTS + index, newCard);
+    return set(puzzle.getStrikingSlotCount() + index, newCard);
   }
 
   private Card set(int index, Card newCard) {
@@ -113,7 +96,7 @@ public class Selection {
       if (!isUsed(oldCard)) {
         throw new IllegalArgumentException();
       }
-      chemistry -= oldCard.getChemistryAt(STYLE_TARGETS[index]);
+      chemistry -= oldCard.getChemistryAt(moveSlotTypes[index]);
       headMovement -= oldCard.getHeadMovement();
       throwSkill -= oldCard.getThrowSkill();
       silvers -= oldCard.getLevel().equals(Level.SILVER) ? 1 : 0;
@@ -124,7 +107,7 @@ public class Selection {
       if (isUsed(newCard)) {
         throw new IllegalArgumentException();
       }
-      chemistry += newCard.getChemistryAt(STYLE_TARGETS[index]);
+      chemistry += newCard.getChemistryAt(moveSlotTypes[index]);
       headMovement += newCard.getHeadMovement();
       throwSkill += newCard.getThrowSkill();
       silvers += newCard.getLevel().equals(Level.SILVER) ? 1 : 0;
@@ -152,25 +135,25 @@ public class Selection {
   }
 
   public boolean isSolved() {
-    return chemistry >= TARGET_CHEMISTRY &&
-        headMovement >= TARGET_HEAD_MOVEMENT &&
-        throwSkill >= TARGET_THROW_SKILL &&
-        silvers <= TARGET_SILVERS;
+    return chemistry >= puzzle.getMinimumChemistry() &&
+        headMovement >= puzzle.getMinimumHeadMovement() &&
+        throwSkill >= puzzle.getMinimumThrowSkill() &&
+        silvers <= puzzle.getMaximumSilvers();
   }
 
   public double getNaughtiness() {
     double naughtiness = 0;
-    if (chemistry < TARGET_CHEMISTRY) {
-      naughtiness += TARGET_CHEMISTRY - chemistry;
+    if (chemistry < puzzle.getMinimumChemistry()) {
+      naughtiness += puzzle.getMinimumChemistry() - chemistry;
     }
-    if (headMovement < TARGET_HEAD_MOVEMENT) {
-      naughtiness += TARGET_HEAD_MOVEMENT - headMovement;
+    if (headMovement < puzzle.getMinimumHeadMovement()) {
+      naughtiness += puzzle.getMinimumHeadMovement() - headMovement;
     }
-    if (throwSkill < TARGET_THROW_SKILL) {
-      naughtiness += TARGET_THROW_SKILL - throwSkill;
+    if (throwSkill < puzzle.getMinimumThrowSkill()) {
+      naughtiness += puzzle.getMinimumThrowSkill() - throwSkill;
     }
-    if (silvers > TARGET_SILVERS) {
-      naughtiness += 3 * (silvers - TARGET_SILVERS);
+    if (silvers > puzzle.getMaximumSilvers()) {
+      naughtiness += (silvers - puzzle.getMaximumSilvers());
     }
     return naughtiness;
   }

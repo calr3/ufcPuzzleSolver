@@ -1,48 +1,38 @@
 package org.apterous.ufcoptimizer;
 
-import com.google.common.collect.ImmutableList;
-
-import java.util.Collections;
-import java.util.List;
 import java.util.Random;
-
-import static java.util.stream.Collectors.toList;
 
 /** The core solving engine. */
 final class Solver {
 
   /** Solves the puzzle, using stochastic gradient descent. */
-  static Selection getBestSelection(ImmutableList<Card> cards, Random random) {
-    // Split the cards into striking and grappling, and randomize them.
-    List<Card> strikingCards =
-        cards.stream().filter(card -> card.getMoveType().isStriking()).collect(toList());
-    List<Card> grapplingCards =
-        cards.stream().filter(card -> !card.getMoveType().isStriking()).collect(toList());
-    Collections.shuffle(strikingCards, random);
-    Collections.shuffle(grapplingCards, random);
-
-    Selection selection = new Selection(cards);
+  static Selection getBestSelection(Puzzle puzzle, Random random) {
+    Selection selection = new Selection(puzzle);
 
     Selection bestEver = new Selection(selection);
     double lowestEverNaughtiness = bestEver.getNaughtiness();
 
     double oldNaughtiness = selection.getNaughtiness();
-    for (int grind = 0; grind < 12_000 && !selection.isSolved(); ++grind) {
-      int targetIndex = random.nextInt(Selection.TOTAL_SLOTS);
-
+    // TODO: puzzle hard-coding (12000).
+    for (int grind = 0; grind < 1_000_000 && !selection.isSolved(); ++grind) {
+      // Put a random card in a random slot.
+      int targetIndex = random.nextInt(puzzle.getMoveSlotCount());
       Card newCard, oldCard;
-      if (targetIndex < Selection.STRIKING_SLOTS) {
-        newCard = selection.getRandomUnused(strikingCards, random);
+      if (targetIndex < puzzle.getStrikingSlotCount()) {
+        newCard = selection.getRandomUnused(puzzle.getStrikingCards(), random);
         oldCard = selection.setStriking(targetIndex, newCard);
       } else {
-        newCard = selection.getRandomUnused(grapplingCards, random);
-        oldCard = selection.setGrappling(targetIndex - Selection.STRIKING_SLOTS, newCard);
-      }
+        newCard = selection.getRandomUnused(puzzle.getGrapplingCards(), random);
+        oldCard = selection.setGrappling(
+            targetIndex - puzzle.getStrikingSlotCount(), newCard);
+    }
 
+      // Evaluate the new fitness against the old one.
       double newNaughtiness = selection.getNaughtiness();
       boolean newLowestEver = newNaughtiness < lowestEverNaughtiness;
       boolean accept = accept(oldNaughtiness, newNaughtiness, random);
 
+      // Print some progress info.
       if (newLowestEver) {
         System.out.printf("%08d: %8.5g [%s]    [%s] -> [%s]    [%s]%n",
             grind,
@@ -53,6 +43,7 @@ final class Solver {
             selection.getDescription());
       }
 
+      // If we like the new state, stick with it. Otherwise roll it back.
       if (accept) {
         oldNaughtiness = newNaughtiness;
         if (newNaughtiness < lowestEverNaughtiness) {
@@ -60,10 +51,10 @@ final class Solver {
           bestEver = new Selection(selection);
         }
       } else {
-        if (targetIndex < Selection.STRIKING_SLOTS) {
+        if (targetIndex < puzzle.getStrikingSlotCount()) {
           selection.setStriking(targetIndex, oldCard);
         } else {
-          selection.setGrappling(targetIndex - Selection.STRIKING_SLOTS, oldCard);
+          selection.setGrappling(targetIndex - puzzle.getStrikingSlotCount(), oldCard);
         }
       }
     }
@@ -76,6 +67,7 @@ final class Solver {
    *
    * <p>Downhill steps are always allowed; uphill steps are allowed with some probability.
    */
+  // TODO: puzzle hard-coding (might be too rigid).
   private static boolean accept(double oldNaughtiness, double newNaughtiness, Random random) {
     double worseness = newNaughtiness - oldNaughtiness;
 

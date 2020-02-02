@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.collect.MoreCollectors.onlyElement;
 
 /** Parse the file at a given path into a list of cards. */
 final class CardFileParser {
@@ -97,7 +98,6 @@ final class CardFileParser {
   private static Level parseLevel(String raw) {
     return Arrays.stream(Level.values())
         .filter(level -> level.name().charAt(0) == raw.charAt(0))
-        .findAny()
-        .orElseThrow();
+        .collect(onlyElement());
   }
 }

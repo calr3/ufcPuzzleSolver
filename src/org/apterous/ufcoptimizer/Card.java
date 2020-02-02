@@ -62,6 +62,7 @@ final class Card {
   }
 
   // TODO(constants need checking and could be optimized)
+  // TODO: puzzle hard-coding.
   public int getChemistryAt(MoveType moveType) {
     int matches = 0;
     if (weight == Weight.BW) {

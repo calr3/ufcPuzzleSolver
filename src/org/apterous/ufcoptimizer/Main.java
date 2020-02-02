@@ -1,6 +1,7 @@
 package org.apterous.ufcoptimizer;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultiset;
 
 import java.io.IOException;
 import java.nio.file.FileSystems;
@@ -18,17 +19,37 @@ import java.util.Random;
  * <p>The cards used are loaded from a file, in a rather clunky CSV format.
  * This will be improved in a future version.
  */
-public class Main {
+public final class Main {
 
   public static void main(String[] args) throws IOException {
     ImmutableList<Card> cards =
         new CardFileParser(FileSystems.getDefault().getPath(args[0])).load();
 
-    Selection bestSelection = Solver.getBestSelection(cards, new Random(12989));
+    Puzzle puzzle =
+        new Puzzle(
+            cards,
+            ImmutableMultiset.<MoveType>builder()
+                .addCopies(MoveType.ARM, 3)
+                .addCopies(MoveType.LEG, 3)
+                .addCopies(MoveType.CLINCH, 2)
+                .addCopies(MoveType.TAKEDOWN, 2)
+                .addCopies(MoveType.SUBMISSION, 2)
+                .addCopies(MoveType.GROUND, 2)
+                .build(),
+            75,
+            100,
+            95,
+            1,
+            75,
+            74);
+
+    Selection bestSelection = Solver.getBestSelection(puzzle, new Random(129189));
 
     System.out.println(bestSelection);
     System.out.println(bestSelection.getDescription());
     System.out.println(bestSelection.getNaughtiness());
     System.out.println(bestSelection.getLongDescription());
   }
+
+  private Main() {}  // Not for instantiation.
 }
