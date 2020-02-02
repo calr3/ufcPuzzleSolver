@@ -1,5 +1,6 @@
 package org.apterous.ufcoptimizer;
 
+/** The fighting style associated with a move or fighter. */
 public enum Style {
   BALANCED {
     @Override

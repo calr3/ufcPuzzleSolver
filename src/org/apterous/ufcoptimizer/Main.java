@@ -14,6 +14,18 @@ import java.util.stream.Stream;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.util.stream.Collectors.toList;
 
+/**
+ * The entry point for the application.
+ *
+ * <p>This application solves the Challenge puzzles in EA's game UFC 3 for
+ * PlayStation 4 and XBox One.
+ *
+ * <p>The puzzle it solves is currently hard-coded. This will be improved in a
+ * future version.
+ *
+ * <p>The cards used are loaded from a file, in a rather clunky CSV format.
+ * This will be improved in a future version.
+ */
 public class Main {
 
   private static boolean accept(double oldNaughtiness, double newNaughtiness, Random random) {
