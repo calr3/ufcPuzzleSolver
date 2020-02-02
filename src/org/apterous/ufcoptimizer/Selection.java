@@ -6,12 +6,12 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import static org.apterous.ufcoptimizer.Type.ARM;
-import static org.apterous.ufcoptimizer.Type.CLINCH;
-import static org.apterous.ufcoptimizer.Type.GROUND;
-import static org.apterous.ufcoptimizer.Type.LEG;
-import static org.apterous.ufcoptimizer.Type.SUBMISSION;
-import static org.apterous.ufcoptimizer.Type.TAKEDOWN;
+import static org.apterous.ufcoptimizer.MoveType.ARM;
+import static org.apterous.ufcoptimizer.MoveType.CLINCH;
+import static org.apterous.ufcoptimizer.MoveType.GROUND;
+import static org.apterous.ufcoptimizer.MoveType.LEG;
+import static org.apterous.ufcoptimizer.MoveType.SUBMISSION;
+import static org.apterous.ufcoptimizer.MoveType.TAKEDOWN;
 
 public class Selection {
 
@@ -20,7 +20,7 @@ public class Selection {
   private static final int TARGET_THROW_SKILL = 95;
   private static final int TARGET_SILVERS = 1;
 
-  private static final Type[] STYLE_TARGETS = {
+  private static final MoveType[] STYLE_TARGETS = {
       ARM, ARM, ARM,
       LEG, LEG, LEG,
       CLINCH, CLINCH,
@@ -30,7 +30,7 @@ public class Selection {
   };
   public static final int TOTAL_SLOTS = STYLE_TARGETS.length;
   public static final int STRIKING_SLOTS =
-      (int) Arrays.stream(STYLE_TARGETS).filter(Type::isStriking).count();
+      (int) Arrays.stream(STYLE_TARGETS).filter(MoveType::isStriking).count();
   public static final int GRAPPLING_SLOTS = TOTAL_SLOTS - STRIKING_SLOTS;
 
   private final Card[] cards;
@@ -91,14 +91,14 @@ public class Selection {
   }
 
   public Card setStriking(int index, Card newCard) {
-    if (index < 0 || index >= STRIKING_SLOTS || (newCard != null && !newCard.getType().isStriking())) {
+    if (index < 0 || index >= STRIKING_SLOTS || (newCard != null && !newCard.getMoveType().isStriking())) {
       throw new IllegalArgumentException();
     }
     return set(index, newCard);
   }
 
   public Card setGrappling(int index, Card newCard) {
-    if (index < 0 || index >= GRAPPLING_SLOTS || (newCard != null && newCard.getType().isStriking())) {
+    if (index < 0 || index >= GRAPPLING_SLOTS || (newCard != null && newCard.getMoveType().isStriking())) {
       throw new IllegalArgumentException(String.format("Can't set %s to %s", newCard, index));
     }
     return set(STRIKING_SLOTS + index, newCard);

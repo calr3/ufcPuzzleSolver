@@ -1,6 +1,6 @@
 package org.apterous.ufcoptimizer;
 
-public enum Type {
+public enum MoveType {
   ARM {
     @Override
     public String toString() {

@@ -35,7 +35,7 @@ public class Main {
     }
     List<Card> strikingCards = new ArrayList<>();
     List<Card> grapplingCards = new ArrayList<>();
-    cards.forEach(card -> (card.getType().isStriking() ? strikingCards : grapplingCards).add(card));
+    cards.forEach(card -> (card.getMoveType().isStriking() ? strikingCards : grapplingCards).add(card));
 
 
     Random random = new Random(12989);
@@ -134,10 +134,10 @@ public class Main {
     throw new IllegalArgumentException("Bad weight " + raw);
   }
 
-  private static Type parseType(String raw) {
-    for (Type type : Type.values()) {
-      if (type.name().equalsIgnoreCase(raw)) {
-        return type;
+  private static MoveType parseType(String raw) {
+    for (MoveType moveType : MoveType.values()) {
+      if (moveType.name().equalsIgnoreCase(raw)) {
+        return moveType;
       }
     }
 

@@ -5,7 +5,7 @@ public class Card {
   private final int id;
   private final Weight weight;
   private final Style style;
-  private final Type type;
+  private final MoveType moveType;
 
   private final int headMovement;
   private final int throwSkill;
@@ -23,11 +23,11 @@ public class Card {
     return level;
   }
 
-  public Card(int id, Weight weight, Style style, Type type, int headMovement, int throwSkill, Level level) {
+  public Card(int id, Weight weight, Style style, MoveType moveType, int headMovement, int throwSkill, Level level) {
     this.id = id;
     this.weight = weight;
     this.style = style;
-    this.type = type;
+    this.moveType = moveType;
     this.headMovement = headMovement;
     this.throwSkill = throwSkill;
     this.level = level;
@@ -46,19 +46,19 @@ public class Card {
   @Override
   public String toString() {
     return String.format("%03d:%s:%s:%s:%+d:%+d:%s",
-        id, weight, style, type, headMovement, throwSkill, level.name().substring(0, 1));
+        id, weight, style, moveType, headMovement, throwSkill, level.name().substring(0, 1));
   }
 
   public int getIndex() {
     return id;
   }
 
-  public Type getType() {
-    return type;
+  public MoveType getMoveType() {
+    return moveType;
   }
 
   // TODO(constants need checking and could be optimized)
-  public int getChemistryAt(Type type) {
+  public int getChemistryAt(MoveType moveType) {
     int matches = 0;
     if (weight == Weight.BW) {
       matches++;
@@ -66,7 +66,7 @@ public class Card {
     if (style == Style.BALANCED) {
       matches++;
     }
-    if (type == this.type) {
+    if (moveType == this.moveType) {
       matches++;
     }
 
