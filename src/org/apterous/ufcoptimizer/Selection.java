@@ -13,6 +13,7 @@ import static org.apterous.ufcoptimizer.MoveType.LEG;
 import static org.apterous.ufcoptimizer.MoveType.SUBMISSION;
 import static org.apterous.ufcoptimizer.MoveType.TAKEDOWN;
 
+/** A mutable representation of the cards actually assigned. */
 public class Selection {
 
   private static final int TARGET_CHEMISTRY = 75;

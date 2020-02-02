@@ -1,15 +1,18 @@
 package org.apterous.ufcoptimizer;
 
+import com.google.common.collect.ImmutableList;
+
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static com.google.common.collect.ImmutableList.toImmutableList;
+import static java.util.stream.Collectors.toList;
 
 public class Main {
 
@@ -29,14 +32,12 @@ public class Main {
   }
 
   public static void main(String[] args) throws IOException {
-    List<Card> cards;
+    ImmutableList<Card> cards;
     try (Stream<String> lines = Files.lines(FileSystems.getDefault().getPath("C:\\Users\\Charlie\\Downloads\\ufc cards - Sheet1 (3).csv"))) {
-      cards = lines.skip(1).map(Main::parseCard).collect(Collectors.toList());
+      cards = lines.skip(1).map(Main::parseCard).collect(toImmutableList());
     }
-    List<Card> strikingCards = new ArrayList<>();
-    List<Card> grapplingCards = new ArrayList<>();
-    cards.forEach(card -> (card.getMoveType().isStriking() ? strikingCards : grapplingCards).add(card));
-
+    List<Card> strikingCards = cards.stream().filter(card -> card.getMoveType().isStriking()).collect(toList());
+    List<Card> grapplingCards = cards.stream().filter(card -> !card.getMoveType().isStriking()).collect(toList());
 
     Random random = new Random(12989);
     Collections.shuffle(strikingCards, random);
