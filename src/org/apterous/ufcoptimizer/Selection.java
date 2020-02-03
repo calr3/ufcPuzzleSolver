@@ -34,8 +34,8 @@ public class Selection {
 
     this.used = new BitSet(puzzle.getAvailableCards().size());
     this.chemistry = 0;
-    this.headMovement = puzzle.getInitialHeadMovement();
-    this.throwSkill = puzzle.getInitialThrowSkill();
+    this.headMovement = puzzle.getInitialSkill(Skill.HVMT);
+    this.throwSkill = puzzle.getInitialSkill(Skill.THRW);
     this.silvers = 0;
   }
 

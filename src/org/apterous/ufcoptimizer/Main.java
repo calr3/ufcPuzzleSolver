@@ -1,6 +1,7 @@
 package org.apterous.ufcoptimizer;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultiset;
 
 import java.io.IOException;
@@ -42,8 +43,7 @@ public final class Main {
             100,
             95,
             1,
-            75,
-            74);
+            ImmutableMap.of(Skill.HVMT, 75, Skill.THRW, 74));
 
     Selection bestSelection =
         new Solver(new Solver.SolverConfig(1_000_000), puzzle)

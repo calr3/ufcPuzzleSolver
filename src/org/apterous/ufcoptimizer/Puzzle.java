@@ -1,6 +1,7 @@
 package org.apterous.ufcoptimizer;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultiset;
 import com.google.common.primitives.Ints;
 
@@ -28,8 +29,7 @@ final class Puzzle {
   private final int minimumHeadMovement;
   private final int minimumThrowSkill;
   private final int maximumSilvers;
-  private final int initialHeadMovement;
-  private final int initialThrowSkill;
+  private final ImmutableMap<Skill, Integer> initialSkill;
 
   public Puzzle(
       ImmutableList<Card> availableCards,
@@ -38,7 +38,7 @@ final class Puzzle {
       ImmutableMultiset<MoveType> moveSlots,
       int minimumChemistry,
       int minimumHeadMovement, int minimumThrowSkill, int maximumSilvers,
-      int initialHeadMovement, int initialThrowSkill) {
+      ImmutableMap<Skill, Integer> initialSkill) {
     this.availableCards = availableCards;
     strikingCards =
         availableCards.stream().filter(card -> card.getMoveType().isStriking()).collect(toImmutableList());
@@ -57,8 +57,7 @@ final class Puzzle {
     this.minimumHeadMovement = minimumHeadMovement;
     this.minimumThrowSkill = minimumThrowSkill;
     this.maximumSilvers = maximumSilvers;
-    this.initialHeadMovement = initialHeadMovement;
-    this.initialThrowSkill = initialThrowSkill;
+    this.initialSkill = checkNotNull(initialSkill);
   }
 
   public ImmutableList<Card> getAvailableCards() {
@@ -113,11 +112,7 @@ final class Puzzle {
     return maximumSilvers;
   }
 
-  public int getInitialHeadMovement() {
-    return initialHeadMovement;
-  }
-
-  public int getInitialThrowSkill() {
-    return initialThrowSkill;
+  public int getInitialSkill(Skill skill) {
+    return initialSkill.getOrDefault(skill, 0);
   }
 }
