@@ -2,6 +2,7 @@ package org.apterous.ufcoptimizer;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -45,8 +46,9 @@ final class CardFileParser {
         parseWeight(parts[1]),
         parseStyle(parts[2]),
         parseType(parts[3]),
-        parseSkill(parts[5]),
-        parseSkill(parts[6]),
+        ImmutableMap.of(
+            Skill.HVMT, parseSkill(parts[5]),
+            Skill.THRW, parseSkill(parts[6])),
         parseLevel(parts[7])
     );
   }

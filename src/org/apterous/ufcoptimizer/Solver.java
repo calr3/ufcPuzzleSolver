@@ -56,7 +56,7 @@ final class Solver {
 
       // Print some progress info.
       if (newLowestEver) {
-        System.out.printf("%08d: %8.5g [%s]    [%s] -> [%s]    [%s]%n",
+        System.out.printf("%08d: %8.5g [%s]    [%-24s] -> [%-24s]    [%s]%n",
             grind,
             newNaughtiness,
             selection,

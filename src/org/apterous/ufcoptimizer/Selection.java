@@ -97,8 +97,8 @@ public class Selection {
         throw new IllegalArgumentException();
       }
       chemistry -= oldCard.getChemistryInSlot(puzzle, moveSlotTypes[index]);
-      headMovement -= oldCard.getHeadMovement();
-      throwSkill -= oldCard.getThrowSkill();
+      headMovement -= oldCard.getSkillModifier(Skill.HVMT);
+      throwSkill -= oldCard.getSkillModifier(Skill.THRW);
       silvers -= oldCard.getLevel().equals(Level.SILVER) ? 1 : 0;
       setUsed(oldCard,false);
     }
@@ -108,8 +108,8 @@ public class Selection {
         throw new IllegalArgumentException();
       }
       chemistry += newCard.getChemistryInSlot(puzzle, moveSlotTypes[index]);
-      headMovement += newCard.getHeadMovement();
-      throwSkill += newCard.getThrowSkill();
+      headMovement += newCard.getSkillModifier(Skill.HVMT);
+      throwSkill += newCard.getSkillModifier(Skill.THRW);
       silvers += newCard.getLevel().equals(Level.SILVER) ? 1 : 0;
       setUsed(newCard, true);
     }

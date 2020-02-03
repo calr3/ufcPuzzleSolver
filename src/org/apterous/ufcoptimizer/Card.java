@@ -1,6 +1,11 @@
 package org.apterous.ufcoptimizer;
 
+import com.google.common.collect.ImmutableMap;
+
 import javax.annotation.concurrent.Immutable;
+import java.util.stream.Collectors;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /** An immutable representation of a card in the game. */
 @Immutable
@@ -11,29 +16,17 @@ final class Card {
   private final Style style;
   private final MoveType moveType;
 
-  private final int headMovement;
-  private final int throwSkill;
+  private final ImmutableMap<Skill, Integer> skillModifiers;
   private final Level level;
 
-  public int getHeadMovement() {
-    return headMovement;
-  }
-
-  public int getThrowSkill() {
-    return throwSkill;
-  }
-
-  public Level getLevel() {
-    return level;
-  }
-
-  public Card(int id, Weight weight, Style style, MoveType moveType, int headMovement, int throwSkill, Level level) {
+  public Card(
+      int id, Weight weight, Style style, MoveType moveType,
+      ImmutableMap<Skill, Integer> skillModifiers, Level level) {
     this.id = id;
     this.weight = weight;
     this.style = style;
     this.moveType = moveType;
-    this.headMovement = headMovement;
-    this.throwSkill = throwSkill;
+    this.skillModifiers = skillModifiers;
     this.level = level;
   }
 
@@ -49,8 +42,15 @@ final class Card {
 
   @Override
   public String toString() {
-    return String.format("%03d:%s:%s:%s:%+d:%+d:%s",
-        id, weight, style, moveType, headMovement, throwSkill, level.name().substring(0, 1));
+    return String.format("%03d:%s:%s:%s:%c:%s",
+        id, weight, style, moveType, level.name().charAt(0), getSkillModifierDescription());
+  }
+
+  private String getSkillModifierDescription() {
+    return skillModifiers.entrySet().stream()
+        .filter(entry -> !entry.getValue().equals(0))
+        .map(entry -> String.format("%4s=%+d", entry.getKey(), entry.getValue()))
+        .collect(Collectors.joining(","));
   }
 
   public int getIndex() {
@@ -59,6 +59,15 @@ final class Card {
 
   public MoveType getMoveType() {
     return moveType;
+  }
+
+  public int getSkillModifier(Skill skill) {
+    checkNotNull(skill);
+    return skillModifiers.getOrDefault(skill, 0);
+  }
+
+  public Level getLevel() {
+    return level;
   }
 
   // TODO(constants need checking and could be optimized)
