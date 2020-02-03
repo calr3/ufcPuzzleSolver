@@ -1,21 +1,43 @@
 package org.apterous.ufcoptimizer;
 
+import javax.annotation.concurrent.Immutable;
 import java.util.Random;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /** The core solving engine. */
+@Immutable
 final class Solver {
 
+  @Immutable
+  static final class SolverConfig {
+
+    private final int maximumIterations;
+
+    SolverConfig(int maximumIterations) {
+      this.maximumIterations = maximumIterations;
+    }
+  }
+
+  private final SolverConfig solverConfig;
+  private final Puzzle puzzle;
+
+  Solver(SolverConfig solverConfig, Puzzle puzzle) {
+    this.solverConfig = checkNotNull(solverConfig);
+    this.puzzle = checkNotNull(puzzle);
+  }
+
   /** Solves the puzzle, using stochastic gradient descent. */
-  static Selection getBestSelection(Puzzle puzzle, Random random) {
+  Selection getBestSelection(Random random) {
     Selection selection = new Selection(puzzle);
 
     Selection bestEver = new Selection(selection);
     double lowestEverNaughtiness = bestEver.getNaughtiness();
 
     double oldNaughtiness = selection.getNaughtiness();
-    // TODO: puzzle hard-coding (12000).
-    for (int grind = 0; grind < 1_000_000 && !selection.isSolved(); ++grind) {
+    for (int grind = 0; grind < solverConfig.maximumIterations && !selection.isSolved(); ++grind) {
       // Put a random card in a random slot.
+      // TODO: support selecting null as newCard.
       int targetIndex = random.nextInt(puzzle.getMoveSlotCount());
       Card newCard, oldCard;
       if (targetIndex < puzzle.getStrikingSlotCount()) {

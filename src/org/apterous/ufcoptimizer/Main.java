@@ -45,7 +45,9 @@ public final class Main {
             75,
             74);
 
-    Selection bestSelection = Solver.getBestSelection(puzzle, new Random(129189));
+    Selection bestSelection =
+        new Solver(new Solver.SolverConfig(1_000_000), puzzle)
+            .getBestSelection(new Random(129189));
 
     System.out.println(bestSelection);
     System.out.println(bestSelection.getDescription());
