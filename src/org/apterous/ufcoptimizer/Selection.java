@@ -96,7 +96,7 @@ public class Selection {
       if (!isUsed(oldCard)) {
         throw new IllegalArgumentException();
       }
-      chemistry -= oldCard.getChemistryAt(moveSlotTypes[index]);
+      chemistry -= oldCard.getChemistryInSlot(puzzle, moveSlotTypes[index]);
       headMovement -= oldCard.getHeadMovement();
       throwSkill -= oldCard.getThrowSkill();
       silvers -= oldCard.getLevel().equals(Level.SILVER) ? 1 : 0;
@@ -107,7 +107,7 @@ public class Selection {
       if (isUsed(newCard)) {
         throw new IllegalArgumentException();
       }
-      chemistry += newCard.getChemistryAt(moveSlotTypes[index]);
+      chemistry += newCard.getChemistryInSlot(puzzle, moveSlotTypes[index]);
       headMovement += newCard.getHeadMovement();
       throwSkill += newCard.getThrowSkill();
       silvers += newCard.getLevel().equals(Level.SILVER) ? 1 : 0;

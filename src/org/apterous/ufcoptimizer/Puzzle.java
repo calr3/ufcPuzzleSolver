@@ -6,6 +6,7 @@ import com.google.common.primitives.Ints;
 
 import javax.annotation.concurrent.Immutable;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 
 /** An immutable general description of a puzzle to be solved. */
@@ -15,6 +16,9 @@ final class Puzzle {
   private final ImmutableList<Card> availableCards;
   private final ImmutableList<Card> strikingCards;
   private final ImmutableList<Card> grapplingCards;
+
+  private final Weight fighterWeight;
+  private final Style fighterStyle;
 
   private final ImmutableMultiset<MoveType> moveSlots;
   private final int strikingSlotCount;
@@ -29,6 +33,8 @@ final class Puzzle {
 
   public Puzzle(
       ImmutableList<Card> availableCards,
+      Weight fighterWeight,
+      Style fighterStyle,
       ImmutableMultiset<MoveType> moveSlots,
       int minimumChemistry,
       int minimumHeadMovement, int minimumThrowSkill, int maximumSilvers,
@@ -38,6 +44,9 @@ final class Puzzle {
         availableCards.stream().filter(card -> card.getMoveType().isStriking()).collect(toImmutableList());
     grapplingCards =
         availableCards.stream().filter(card -> !card.getMoveType().isStriking()).collect(toImmutableList());
+
+    this.fighterWeight = checkNotNull(fighterWeight);
+    this.fighterStyle = checkNotNull(fighterStyle);
 
     this.moveSlots = moveSlots;
     this.strikingSlotCount =
@@ -62,6 +71,14 @@ final class Puzzle {
 
   public ImmutableList<Card> getGrapplingCards() {
     return grapplingCards;
+  }
+
+  public Weight getFighterWeight() {
+    return fighterWeight;
+  }
+
+  public Style getFighterStyle() {
+    return fighterStyle;
   }
 
   public int getMoveSlotCount() {

@@ -28,6 +28,8 @@ public final class Main {
     Puzzle puzzle =
         new Puzzle(
             cards,
+            Weight.BW,
+            Style.BALANCED,
             ImmutableMultiset.<MoveType>builder()
                 .addCopies(MoveType.ARM, 3)
                 .addCopies(MoveType.LEG, 3)

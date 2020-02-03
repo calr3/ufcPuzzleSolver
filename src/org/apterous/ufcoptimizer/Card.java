@@ -62,16 +62,15 @@ final class Card {
   }
 
   // TODO(constants need checking and could be optimized)
-  // TODO: puzzle hard-coding.
-  public int getChemistryAt(MoveType moveType) {
+  public int getChemistryInSlot(Puzzle puzzle, MoveType slotMoveType) {
     int matches = 0;
-    if (weight == Weight.BW) {
+    if (weight.equals(puzzle.getFighterWeight())) {
       matches++;
     }
-    if (style == Style.BALANCED) {
+    if (style.equals(puzzle.getFighterStyle())) {
       matches++;
     }
-    if (moveType == this.moveType) {
+    if (moveType.equals(slotMoveType)) {
       matches++;
     }
 
