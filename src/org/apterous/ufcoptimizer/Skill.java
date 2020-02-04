@@ -14,4 +14,8 @@ public enum Skill {
   CCON,
   TOP,
   BOT,
+  TD,
+  TDD,
+  SUBO,
+  SUBD
 }
