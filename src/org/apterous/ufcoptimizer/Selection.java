@@ -18,8 +18,7 @@ public class Selection {
 
   private final BitSet used;
   private int chemistry;
-  private int headMovement;
-  private int throwSkill;
+  private int[] skillValues;  // Indexed in the same order as Skill enum values.
   private int silvers;
 
   public Selection(Puzzle puzzle) {
@@ -34,8 +33,7 @@ public class Selection {
 
     this.used = new BitSet(puzzle.getAvailableCards().size());
     this.chemistry = 0;
-    this.headMovement = puzzle.getInitialSkill(Skill.HVMT);
-    this.throwSkill = puzzle.getInitialSkill(Skill.THRW);
+    this.skillValues = Arrays.stream(Skill.values()).mapToInt(puzzle::getInitialSkill).toArray();
     this.silvers = 0;
   }
 
@@ -46,15 +44,19 @@ public class Selection {
 
     used = (BitSet) selection.used.clone();
     chemistry = selection.chemistry;
-    headMovement = selection.headMovement;
-    throwSkill = selection.throwSkill;
+    skillValues = selection.skillValues.clone();
     silvers = selection.silvers;
 }
 
   @Override
   public String toString() {
-    return String.format("Chem=%2d; Hvmt=%3d; Thrw=%3d; Silv=%d",
-        chemistry, headMovement, throwSkill, silvers);
+    return String.format("Chem=%2d; %s; Silv=%d",
+        chemistry,
+        IntStream.range(0, skillValues.length)
+            .filter(skillIndex -> skillValues[skillIndex] != 0)
+            .mapToObj(skillIndex -> String.format("%4s=%3d", Skill.values()[skillIndex], skillValues[skillIndex]))
+            .collect(Collectors.joining("; ")),
+        silvers);
   }
 
   public String getDescription() {
@@ -97,8 +99,9 @@ public class Selection {
         throw new IllegalArgumentException();
       }
       chemistry -= oldCard.getChemistryInSlot(puzzle, moveSlotTypes[index]);
-      headMovement -= oldCard.getSkillModifier(Skill.HVMT);
-      throwSkill -= oldCard.getSkillModifier(Skill.THRW);
+      for (int skillIndex = 0; skillIndex < Skill.values().length; skillIndex++) {
+        skillValues[skillIndex] -= oldCard.getSkillModifier(Skill.values()[skillIndex]);
+      }
       silvers -= oldCard.getLevel().equals(Level.SILVER) ? 1 : 0;
       setUsed(oldCard,false);
     }
@@ -108,8 +111,9 @@ public class Selection {
         throw new IllegalArgumentException();
       }
       chemistry += newCard.getChemistryInSlot(puzzle, moveSlotTypes[index]);
-      headMovement += newCard.getSkillModifier(Skill.HVMT);
-      throwSkill += newCard.getSkillModifier(Skill.THRW);
+      for (int skillIndex = 0; skillIndex < Skill.values().length; skillIndex++) {
+        skillValues[skillIndex] += newCard.getSkillModifier(Skill.values()[skillIndex]);
+      }
       silvers += newCard.getLevel().equals(Level.SILVER) ? 1 : 0;
       setUsed(newCard, true);
     }
@@ -136,8 +140,8 @@ public class Selection {
 
   public boolean isSolved() {
     return chemistry >= puzzle.getMinimumChemistry() &&
-        headMovement >= puzzle.getMinimumHeadMovement() &&
-        throwSkill >= puzzle.getMinimumThrowSkill() &&
+        skillValues[Skill.HVMT.ordinal()] >= puzzle.getMinimumHeadMovement() &&
+        skillValues[Skill.THRW.ordinal()] >= puzzle.getMinimumThrowSkill() &&
         silvers <= puzzle.getMaximumSilvers();
   }
 
@@ -146,11 +150,11 @@ public class Selection {
     if (chemistry < puzzle.getMinimumChemistry()) {
       naughtiness += puzzle.getMinimumChemistry() - chemistry;
     }
-    if (headMovement < puzzle.getMinimumHeadMovement()) {
-      naughtiness += puzzle.getMinimumHeadMovement() - headMovement;
+    if (skillValues[Skill.HVMT.ordinal()] < puzzle.getMinimumHeadMovement()) {
+      naughtiness += puzzle.getMinimumHeadMovement() - skillValues[Skill.HVMT.ordinal()];
     }
-    if (throwSkill < puzzle.getMinimumThrowSkill()) {
-      naughtiness += puzzle.getMinimumThrowSkill() - throwSkill;
+    if (skillValues[Skill.THRW.ordinal()] < puzzle.getMinimumThrowSkill()) {
+      naughtiness += puzzle.getMinimumThrowSkill() - skillValues[Skill.THRW.ordinal()];
     }
     if (silvers > puzzle.getMaximumSilvers()) {
       naughtiness += (silvers - puzzle.getMaximumSilvers());
