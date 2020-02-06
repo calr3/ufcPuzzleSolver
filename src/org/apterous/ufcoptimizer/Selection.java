@@ -18,7 +18,7 @@ public class Selection {
 
   private final BitSet used;
   private int chemistry;
-  private int[] skillValues;  // Indexed in the same order as Skill enum values.
+  private EnumCounter<Skill> skillCounter;
   private int silvers;
 
   public Selection(Puzzle puzzle) {
@@ -33,7 +33,7 @@ public class Selection {
 
     this.used = new BitSet(puzzle.getAvailableCards().size());
     this.chemistry = 0;
-    this.skillValues = Arrays.stream(Skill.values()).mapToInt(puzzle::getInitialSkill).toArray();
+    this.skillCounter = new EnumCounter<>(Skill.values(), puzzle::getInitialSkill);
     this.silvers = 0;
   }
 
@@ -44,7 +44,7 @@ public class Selection {
 
     used = (BitSet) selection.used.clone();
     chemistry = selection.chemistry;
-    skillValues = selection.skillValues.clone();
+    skillCounter = new EnumCounter<>(selection.skillCounter);
     silvers = selection.silvers;
 }
 
@@ -52,9 +52,9 @@ public class Selection {
   public String toString() {
     return String.format("Chem=%2d; %s; Silv=%d",
         chemistry,
-        IntStream.range(0, skillValues.length)
-            .filter(skillIndex -> skillValues[skillIndex] != 0)
-            .mapToObj(skillIndex -> String.format("%4s=%3d", Skill.values()[skillIndex], skillValues[skillIndex]))
+        skillCounter.values().stream()
+            .filter(skill -> skillCounter.get(skill) != 0)
+            .map(skill -> String.format("%4s=%3d", skill, skillCounter.get(skill)))
             .collect(Collectors.joining("; ")),
         silvers);
   }
@@ -90,6 +90,8 @@ public class Selection {
     return set(puzzle.getStrikingSlotCount() + index, newCard);
   }
 
+  // This method is performance-sensitive; it's the main workhorse that solvers
+  // will use to iterate and explore the space.
   private Card set(int index, Card newCard) {
     Card oldCard = cards[index];
     cards[index] = newCard;
@@ -99,8 +101,8 @@ public class Selection {
         throw new IllegalArgumentException();
       }
       chemistry -= oldCard.getChemistryInSlot(puzzle, moveSlotTypes[index]);
-      for (int skillIndex = 0; skillIndex < Skill.values().length; skillIndex++) {
-        skillValues[skillIndex] -= oldCard.getSkillModifier(Skill.values()[skillIndex]);
+      for (Skill skill : skillCounter.values()) {
+        skillCounter.add(skill, -oldCard.getSkillModifier(skill));
       }
       silvers -= oldCard.getLevel().equals(Level.SILVER) ? 1 : 0;
       setUsed(oldCard,false);
@@ -111,8 +113,8 @@ public class Selection {
         throw new IllegalArgumentException();
       }
       chemistry += newCard.getChemistryInSlot(puzzle, moveSlotTypes[index]);
-      for (int skillIndex = 0; skillIndex < Skill.values().length; skillIndex++) {
-        skillValues[skillIndex] += newCard.getSkillModifier(Skill.values()[skillIndex]);
+      for (Skill skill : skillCounter.values()) {
+        skillCounter.add(skill, newCard.getSkillModifier(skill));
       }
       silvers += newCard.getLevel().equals(Level.SILVER) ? 1 : 0;
       setUsed(newCard, true);
@@ -140,8 +142,8 @@ public class Selection {
 
   public boolean isSolved() {
     return chemistry >= puzzle.getMinimumChemistry() &&
-        skillValues[Skill.HVMT.ordinal()] >= puzzle.getMinimumHeadMovement() &&
-        skillValues[Skill.THRW.ordinal()] >= puzzle.getMinimumThrowSkill() &&
+        skillCounter.get(Skill.HVMT) >= puzzle.getMinimumHeadMovement() &&
+        skillCounter.get(Skill.THRW) >= puzzle.getMinimumThrowSkill() &&
         silvers <= puzzle.getMaximumSilvers();
   }
 
@@ -150,11 +152,11 @@ public class Selection {
     if (chemistry < puzzle.getMinimumChemistry()) {
       naughtiness += puzzle.getMinimumChemistry() - chemistry;
     }
-    if (skillValues[Skill.HVMT.ordinal()] < puzzle.getMinimumHeadMovement()) {
-      naughtiness += puzzle.getMinimumHeadMovement() - skillValues[Skill.HVMT.ordinal()];
+    if (skillCounter.get(Skill.HVMT) < puzzle.getMinimumHeadMovement()) {
+      naughtiness += puzzle.getMinimumHeadMovement() - skillCounter.get(Skill.HVMT);
     }
-    if (skillValues[Skill.THRW.ordinal()] < puzzle.getMinimumThrowSkill()) {
-      naughtiness += puzzle.getMinimumThrowSkill() - skillValues[Skill.THRW.ordinal()];
+    if (skillCounter.get(Skill.THRW) < puzzle.getMinimumThrowSkill()) {
+      naughtiness += puzzle.getMinimumThrowSkill() - skillCounter.get(Skill.THRW);
     }
     if (silvers > puzzle.getMaximumSilvers()) {
       naughtiness += (silvers - puzzle.getMaximumSilvers());
