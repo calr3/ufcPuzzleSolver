@@ -17,5 +17,14 @@ public enum Skill {
   TD,
   TDD,
   SUBO,
-  SUBD
+  SUBD,
+
+//  GSTA,
+//  SSTA,
+//  END,
+//  TGH,
+//  HART,
+//  CHIN,
+//  BODY,
+//  LEGS,
 }
