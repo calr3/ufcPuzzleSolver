@@ -38,16 +38,26 @@ final class Solver {
     for (int grind = 0; grind < solverConfig.maximumIterations && !selection.isSolved(); ++grind) {
       // Put a random card in a random slot.
       // TODO: support selecting null as newCard.
-      int targetIndex = random.nextInt(puzzle.getMoveSlotCount());
-      MoveCard newCard, oldCard;
+      int targetIndex = random.nextInt(puzzle.getSlotCount());
+      MoveCard newMove, oldMove;
+      BoostCard newBoost, oldBoost;
+      int subIndex;
       if (targetIndex < puzzle.getStrikingSlotCount()) {
-        newCard = selection.getRandomUnused(puzzle.getStrikingCards(), random);
-        oldCard = selection.setStriking(targetIndex, newCard);
+        subIndex = targetIndex;
+        newMove = selection.getRandomUnused(puzzle.getStrikingCards(), random);
+        oldMove = selection.setStriking(targetIndex, newMove);
+        newBoost = oldBoost = null;
+      } else if (targetIndex < puzzle.getMoveSlotCount()) {
+        subIndex = targetIndex - puzzle.getStrikingSlotCount();
+        newMove = selection.getRandomUnused(puzzle.getGrapplingCards(), random);
+        oldMove = selection.setGrappling(subIndex, newMove);
+        newBoost = oldBoost = null;
       } else {
-        newCard = selection.getRandomUnused(puzzle.getGrapplingCards(), random);
-        oldCard = selection.setGrappling(
-            targetIndex - puzzle.getStrikingSlotCount(), newCard);
-    }
+        subIndex = targetIndex - puzzle.getMoveSlotCount();
+        newMove = oldMove = null;
+        newBoost = selection.getRandomUnused(puzzle.getBoostCards(), random);
+        oldBoost = selection.setBoost(subIndex, newBoost);
+      }
 
       // Evaluate the new fitness against the old one.
       double newNaughtiness = selection.getNaughtiness();
@@ -56,7 +66,9 @@ final class Solver {
 
       // Print some progress info.
       if (newLowestEver) {
-        System.out.printf("%08d: %8.5g [%s]    [%-24s] -> [%-24s]    [%s]%n",
+        Card oldCard = oldMove == null ? oldBoost : oldMove;
+        Card newCard = newMove == null ? newBoost : newMove;
+        System.out.printf("%08d: %8.5g [%s]    [%-49s] -> [%-49s]    [%s]%n",
             grind,
             newNaughtiness,
             selection,
@@ -74,9 +86,11 @@ final class Solver {
         }
       } else {
         if (targetIndex < puzzle.getStrikingSlotCount()) {
-          selection.setStriking(targetIndex, oldCard);
+          selection.setStriking(subIndex, oldMove);
+        } else if (targetIndex < puzzle.getMoveSlotCount()) {
+          selection.setGrappling(subIndex, oldMove);
         } else {
-          selection.setGrappling(targetIndex - puzzle.getStrikingSlotCount(), oldCard);
+          selection.setBoost(subIndex, oldBoost);
         }
       }
     }

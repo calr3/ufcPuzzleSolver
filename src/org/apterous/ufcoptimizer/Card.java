@@ -10,7 +10,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /** An immutable representation of a card in the game. */
 @Immutable
-public class Card {
+public abstract class Card {
 
   private final int id;
   private final ImmutableMap<Skill, Integer> skillModifiers;
@@ -49,6 +49,6 @@ public class Card {
     return skillModifiers.entrySet().stream()
         .filter(entry -> !entry.getValue().equals(0))
         .map(entry -> String.format("%4s=%+d", entry.getKey(), entry.getValue()))
-        .collect(Collectors.joining(","));
+        .collect(Collectors.joining(" "));
   }
 }

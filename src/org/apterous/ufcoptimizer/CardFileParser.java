@@ -17,11 +17,23 @@ import static com.google.common.collect.MoreCollectors.onlyElement;
 /** Parse the file at a given path into a list of cards. */
 final class CardFileParser {
 
-  private final Path filePath;
+  static final class Cards {
+    final ImmutableList<MoveCard> availableMoves;
+    final ImmutableList<BoostCard> availableBoosts;
+
+    public Cards(ImmutableList<MoveCard> availableMoves, ImmutableList<BoostCard> availableBoosts) {
+      this.availableMoves = Preconditions.checkNotNull(availableMoves);
+      this.availableBoosts = Preconditions.checkNotNull(availableBoosts);
+    }
+  }
+
+  private final Path moveFilePath;
+  private final Path boostFilePath;
 
   /** Construct a new instance to parse the given path. */
-  CardFileParser(Path filePath) {
-    this.filePath = Preconditions.checkNotNull(filePath);
+  CardFileParser(Path moveFilePath, Path boostFilePath) {
+    this.moveFilePath = Preconditions.checkNotNull(moveFilePath);
+    this.boostFilePath = Preconditions.checkNotNull(boostFilePath);
   }
 
   /**
@@ -29,14 +41,23 @@ final class CardFileParser {
    *
    * <p>Indices are contiguous starting from 0.
    */
-  ImmutableList<MoveCard> load() throws IOException {
+  Cards load() throws IOException {
     AtomicInteger index = new AtomicInteger(0);
-    try (Stream<String> lines = Files.lines(filePath)) {
-      return lines
+    ImmutableList<MoveCard> moves;
+    try (Stream<String> lines = Files.lines(moveFilePath)) {
+      moves = lines
           .skip(1)
           .map(line -> parseCard(index.incrementAndGet(), line))
           .collect(toImmutableList());
     }
+    ImmutableList<BoostCard> boosts;
+    try (Stream<String> lines = Files.lines(boostFilePath)) {
+      boosts = lines
+          .skip(1)
+          .map(line -> parseBoostCard(index.incrementAndGet(), line))
+          .collect(toImmutableList());
+    }
+    return new Cards(moves, boosts);
   }
 
   private MoveCard parseCard(int index, String line) {
@@ -51,6 +72,23 @@ final class CardFileParser {
             Skill.THRW, parseSkill(parts[6])),
         parseTier(parts[7])
     );
+  }
+
+  private BoostCard parseBoostCard(int index, String line) {
+    String[] parts = line.split(",");
+    Preconditions.checkArgument(parts.length == 8);
+    return new BoostCard(
+        index,
+        ImmutableMap.<Skill, Integer>builder()
+            .put(Skill.GSTA, parseSkill(parts[1]))
+            .put(Skill.SSTA, parseSkill(parts[2]))
+            .put(Skill.END, parseSkill(parts[3]))
+            .put(Skill.TGH, parseSkill(parts[4]))
+            .put(Skill.HART, parseSkill(parts[5]))
+            .put(Skill.CHIN, parseSkill(parts[6]))
+            .put(Skill.LEGS, parseSkill(parts[7]))
+            .build(),
+        parseTier(parts[0]));
   }
 
   private static Weight parseWeight(String raw) {

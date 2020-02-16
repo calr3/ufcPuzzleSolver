@@ -2,6 +2,7 @@ package org.apterous.ufcoptimizer;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Streams;
 
 import java.util.Arrays;
 import java.util.BitSet;
@@ -17,6 +18,7 @@ public class Selection {
 
   private final Puzzle puzzle;
   private final MoveCard[] cards; // TODO: use two arrays.
+  private final BoostCard[] boostCards;
   private final MoveType[] moveSlotTypes;
 
   private final BitSet used;
@@ -28,6 +30,7 @@ public class Selection {
   public Selection(Puzzle puzzle) {
     this.puzzle = Preconditions.checkNotNull(puzzle);
     this.cards = new MoveCard[puzzle.getMoveSlotCount()];
+    this.boostCards = new BoostCard[puzzle.getBoostSlotCount()];
     // Order can be arbitrary as long as striking slots are first.
     this.moveSlotTypes =
         puzzle.getMoveSlots().stream()
@@ -35,7 +38,7 @@ public class Selection {
             .collect(toList())
             .toArray(new MoveType[0]);
 
-    this.used = new BitSet(puzzle.getAvailableCards().size());
+    this.used = new BitSet(puzzle.getCardCount());
     this.chemistry = 0;
     this.skillCounter = new EnumCounter<>(Skill.values(), puzzle::getInitialSkill);
     this.cardTierCounter = new EnumCounter<>(Tier.values(), tier -> 0);
@@ -45,6 +48,7 @@ public class Selection {
   public Selection(Selection selection) {
     puzzle = selection.puzzle;
     cards = selection.cards.clone();
+    boostCards = selection.boostCards.clone();
     moveSlotTypes = selection.moveSlotTypes.clone();
 
     used = (BitSet) selection.used.clone();
@@ -80,17 +84,20 @@ public class Selection {
   }
 
   public String getDescription() {
-    return Arrays.stream(cards)
+    return Streams.concat(Arrays.stream(cards), Arrays.stream(boostCards))
         .map(card -> card == null ? "___" : String.format("%03d", card.getIndex()))
         .collect(joining(","));
   }
 
   public String getLongDescription() {
-    return IntStream.range(0, cards.length)
-        .mapToObj(
-            cardIndex -> String.format("%s: %s",
-                moveSlotTypes[cardIndex],
-                cards[cardIndex] == null ? "___" : cards[cardIndex].toString()))
+    return Streams.concat(
+          IntStream.range(0, cards.length)
+              .mapToObj(
+                  cardIndex -> String.format("%s: %s",
+                      moveSlotTypes[cardIndex],
+                      cards[cardIndex] == null ? "___" : cards[cardIndex].toString())),
+          Arrays.stream(boostCards)
+              .map(card -> String.format("BST: %s", card == null ? "___" : card.toString())))
         .collect(joining("\n"))
         + "\n\n"
         + (isSolved() ? "Solved" : "Unsolved");
@@ -110,48 +117,75 @@ public class Selection {
     return set(puzzle.getStrikingSlotCount() + index, newCard);
   }
 
+  public BoostCard setBoost(int index, BoostCard newCard) {
+    Preconditions.checkArgument(index >= 0);
+    Preconditions.checkArgument(index < puzzle.getBoostSlotCount());
+
+    BoostCard oldCard = boostCards[index];
+    set(index, newCard, boostCards);
+    return oldCard;
+  }
+
   // This method is performance-sensitive; it's the main workhorse that solvers
   // will use to iterate and explore the space.
   private MoveCard set(int index, MoveCard newCard) {
     MoveCard oldCard = cards[index];
-    cards[index] = newCard;
+    set(index, newCard, cards);
 
     if (oldCard != null) {
-      Preconditions.checkArgument(isUsed(oldCard));
       chemistry -= oldCard.getChemistryInSlot(puzzle, moveSlotTypes[index]);
-      for (Skill skill : skillCounter.values()) {
-        skillCounter.add(skill, -oldCard.getSkillModifier(skill));
-      }
       cardTierCounter.add(oldCard.getTier(), -1);
       cardStyleCounter.add(oldCard.getStyle(), -1);
-      setUsed(oldCard,false);
     }
 
     if (newCard != null) {
-      Preconditions.checkArgument(!isUsed(newCard));
       chemistry += newCard.getChemistryInSlot(puzzle, moveSlotTypes[index]);
-      for (Skill skill : skillCounter.values()) {
-        skillCounter.add(skill, newCard.getSkillModifier(skill));
-      }
       cardTierCounter.add(newCard.getTier(), 1);
       cardStyleCounter.add(newCard.getStyle(), 1);
-      setUsed(newCard, true);
     }
 
     return oldCard;
   }
 
-  public boolean isUsed(MoveCard card) {
+  // Insert the given card (which may be null) into the given card array,
+  // updating counters and state accordingly. Note that this has the
+  // side effect of marking the new card as used (if non-null) and any
+  // previous card in the same position as unused. (If the new and old
+  // cards are actually the same card, the card is still marked as used.)
+  private void set(int index, Card newCard, Card[] cards) {
+    Card oldCard = cards[index];
+    cards[index] = newCard;
+
+    if (oldCard != null) {
+      Preconditions.checkArgument(isUsed(oldCard));
+      for (Skill skill : skillCounter.values()) {
+        skillCounter.add(skill, -oldCard.getSkillModifier(skill));
+      }
+      cardTierCounter.add(oldCard.getTier(), -1);
+      setUsed(oldCard,false);
+    }
+
+    if (newCard != null) {
+      Preconditions.checkArgument(!isUsed(newCard));
+      for (Skill skill : skillCounter.values()) {
+        skillCounter.add(skill, newCard.getSkillModifier(skill));
+      }
+      cardTierCounter.add(newCard.getTier(), 1);
+      setUsed(newCard, true);
+    }
+  }
+
+  public boolean isUsed(Card card) {
     return used.get(card.getIndex());
   }
 
-  public void setUsed(MoveCard card, boolean isUsed) {
+  public void setUsed(Card card, boolean isUsed) {
     used.set(card.getIndex(), isUsed);
   }
 
-  public MoveCard getRandomUnused(List<MoveCard> cards, Random random) {
+  public <CardT extends Card> CardT getRandomUnused(List<? extends CardT> cards, Random random) {
     while (true) {
-      MoveCard card = cards.get(random.nextInt(cards.size()));
+      CardT card = cards.get(random.nextInt(cards.size()));
       if (!isUsed(card)) {
         return card;
       }

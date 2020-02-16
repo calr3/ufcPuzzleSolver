@@ -18,7 +18,7 @@ final class BoostCard extends Card {
 
   @Override
   public String toString() {
-    return String.format("%03d:%c:%s",
+    return String.format("%03d:BST:      :%c:%-29s",
         getIndex(),
         getTier().name().charAt(0),
         getSkillModifierDescription());

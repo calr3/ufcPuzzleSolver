@@ -23,12 +23,21 @@ import java.util.Random;
 public final class Main {
 
   public static void main(String[] args) throws IOException {
-    ImmutableList<MoveCard> cards =
-        new CardFileParser(FileSystems.getDefault().getPath(args[0])).load();
+    CardFileParser.Cards cards =
+        new CardFileParser(
+                FileSystems.getDefault().getPath(args[0]),
+                FileSystems.getDefault().getPath(args[1]))
+            .load();
+
+    // Descriptive constants.
+    ImmutableMap<Skill, RangeConstraint> NO_SKILL_CONSTRAINTS = ImmutableMap.of();
+    ImmutableMap<Tier, RangeConstraint> NO_TIER_CONSTRAINTS = ImmutableMap.of();
+    ImmutableMap<Style, RangeConstraint> NO_STYLE_CONSTRAINTS = ImmutableMap.of();
 
     ImmutableList<Puzzle> puzzles = ImmutableList.of(
         new Puzzle(
-            cards,
+            cards.availableMoves,
+            cards.availableBoosts,
             Weight.BW,
             Style.BALANCED,
             ImmutableMultiset.<MoveType>builder()
@@ -39,17 +48,43 @@ public final class Main {
                 .addCopies(MoveType.SUBMISSION, 2)
                 .addCopies(MoveType.GROUND, 2)
                 .build(),
+            6,
             75,
             ImmutableMap.of(
                 Skill.HVMT, RangeConstraint.min( 100),
                 Skill.THRW, RangeConstraint.min(95)),
             ImmutableMap.of(
                 Tier.SILVER, RangeConstraint.max(1)),
-            ImmutableMap.of(),
-            ImmutableMap.of(Skill.HVMT, 75, Skill.THRW, 74)),
+            NO_STYLE_CONSTRAINTS,
+            ImmutableMap.<Skill, Integer>builder()
+                .put(Skill.SPD, 69)
+                .put(Skill.PWR, 69)
+                .put(Skill.FWRK, 73)
+                .put(Skill.ACC, 69)
+                .put(Skill.SWCH, 69)
+                .put(Skill.BLOK, 69)
+                .put(Skill.HVMT, 75)
+                .put(Skill.THRW, 74)
+                .put(Skill.CCON, 79)
+                .put(Skill.TOP, 79)
+                .put(Skill.BOT, 77)
+                .put(Skill.TD, 79)
+                .put(Skill.TDD, 79)
+                .put(Skill.SUBO, 77)
+                .put(Skill.SUBD, 75)
+                .put(Skill.GSTA, 79)
+                .put(Skill.SSTA, 69)
+                .put(Skill.END, 79)
+                .put(Skill.TGH, 77)
+                .put(Skill.HART, 77)
+                .put(Skill.CHIN, 75)
+                .put(Skill.BODY, 71)
+                .put(Skill.LEGS, 71)
+                .build()),
         // Pack: UFC 200: Normal. Puzzle 1: Miesha Tate: Normal.
         new Puzzle(
-            cards,
+            cards.availableMoves,
+            cards.availableBoosts,
             Weight.BW,
             Style.BRAWLER,
             ImmutableMultiset.<MoveType>builder()
@@ -60,9 +95,10 @@ public final class Main {
                 .addCopies(MoveType.SUBMISSION, 1)
                 .addCopies(MoveType.GROUND, 1)
                 .build(),
+            6,
             25,
-            ImmutableMap.of(),
-            ImmutableMap.of(),
+            NO_SKILL_CONSTRAINTS,
+            NO_TIER_CONSTRAINTS,
             ImmutableMap.of(
                 Style.SPECIALIST, RangeConstraint.min(2)),
             ImmutableMap.<Skill, Integer>builder()
@@ -81,6 +117,58 @@ public final class Main {
                 .put(Skill.TDD, 71)
                 .put(Skill.SUBO, 72)
                 .put(Skill.SUBD, 69)
+                .put(Skill.GSTA, 71)
+                .put(Skill.SSTA, 77)
+                .put(Skill.END, 73)
+                .put(Skill.TGH, 79)
+                .put(Skill.HART, 80)
+                .put(Skill.CHIN, 80)
+                .put(Skill.BODY, 79)
+                .put(Skill.LEGS, 79)
+                .build()),
+        // Pack: UFC 200: Normal. Puzzle 2: Amanda Nunes: Normal.
+        new Puzzle(
+            cards.availableMoves,
+            cards.availableBoosts,
+            Weight.BW,
+            Style.GRAPPLER,
+            ImmutableMultiset.<MoveType>builder()
+                .addCopies(MoveType.ARM, 3)
+                .addCopies(MoveType.LEG, 1)
+                .addCopies(MoveType.CLINCH, 3)
+                .addCopies(MoveType.TAKEDOWN, 4)
+                .addCopies(MoveType.SUBMISSION, 2)
+                .addCopies(MoveType.GROUND, 2)
+                .build(),
+            6,
+            25,
+            ImmutableMap.of(Skill.TGH, RangeConstraint.min(90)),
+            NO_TIER_CONSTRAINTS,
+            NO_STYLE_CONSTRAINTS,
+            ImmutableMap.<Skill, Integer>builder()
+                .put(Skill.SPD, 69)
+                .put(Skill.PWR, 69)
+                .put(Skill.FWRK, 73)
+                .put(Skill.ACC, 69)
+                .put(Skill.SWCH, 69)
+                .put(Skill.BLOK, 69)
+                .put(Skill.HVMT, 69)
+                .put(Skill.THRW, 79)
+                .put(Skill.CCON, 79)
+                .put(Skill.TOP, 79)
+                .put(Skill.BOT, 77)
+                .put(Skill.TD, 79)
+                .put(Skill.TDD, 79)
+                .put(Skill.SUBO, 77)
+                .put(Skill.SUBD, 75)
+                .put(Skill.GSTA, 79)
+                .put(Skill.SSTA, 69)
+                .put(Skill.END, 79)
+                .put(Skill.TGH, 77)
+                .put(Skill.HART, 77)
+                .put(Skill.CHIN, 75)
+                .put(Skill.BODY, 71)
+                .put(Skill.LEGS, 71)
                 .build()));
 
     puzzles.stream()

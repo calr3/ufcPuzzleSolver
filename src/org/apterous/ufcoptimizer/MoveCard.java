@@ -23,9 +23,11 @@ final class MoveCard extends Card {
 
   @Override
   public String toString() {
-    return String.format("%03d:%s:%s:%s:%c:%s",
+    return String.format("%03d:%s:%s:%s:%c:%29s",
         getIndex(),
-        weight, style, moveType,
+        moveType,
+        weight,
+        style,
         getTier().name().charAt(0),
         getSkillModifierDescription());
   }
