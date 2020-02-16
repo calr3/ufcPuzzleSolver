@@ -2,11 +2,13 @@ package org.apterous.ufcoptimizer;
 
 import com.google.common.base.Preconditions;
 
+import javax.annotation.concurrent.Immutable;
 import java.util.OptionalInt;
 
 /**
  * Immutable description of a range of acceptable integers. May include an upper and/or lower bound.
  */
+@Immutable
 class RangeConstraint {
 
   /**

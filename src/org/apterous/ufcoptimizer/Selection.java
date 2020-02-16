@@ -104,7 +104,7 @@ public class Selection {
       for (Skill skill : skillCounter.values()) {
         skillCounter.add(skill, -oldCard.getSkillModifier(skill));
       }
-      silvers -= oldCard.getLevel().equals(Level.SILVER) ? 1 : 0;
+      silvers -= oldCard.getTier().equals(Tier.SILVER) ? 1 : 0;
       setUsed(oldCard,false);
     }
 
@@ -116,7 +116,7 @@ public class Selection {
       for (Skill skill : skillCounter.values()) {
         skillCounter.add(skill, newCard.getSkillModifier(skill));
       }
-      silvers += newCard.getLevel().equals(Level.SILVER) ? 1 : 0;
+      silvers += newCard.getTier().equals(Tier.SILVER) ? 1 : 0;
       setUsed(newCard, true);
     }
 

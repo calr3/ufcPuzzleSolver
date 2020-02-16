@@ -17,17 +17,17 @@ final class Card {
   private final MoveType moveType;
 
   private final ImmutableMap<Skill, Integer> skillModifiers;
-  private final Level level;
+  private final Tier tier;
 
   public Card(
       int id, Weight weight, Style style, MoveType moveType,
-      ImmutableMap<Skill, Integer> skillModifiers, Level level) {
+      ImmutableMap<Skill, Integer> skillModifiers, Tier tier) {
     this.id = id;
     this.weight = weight;
     this.style = style;
     this.moveType = moveType;
     this.skillModifiers = skillModifiers;
-    this.level = level;
+    this.tier = tier;
   }
 
   @Override
@@ -43,7 +43,7 @@ final class Card {
   @Override
   public String toString() {
     return String.format("%03d:%s:%s:%s:%c:%s",
-        id, weight, style, moveType, level.name().charAt(0), getSkillModifierDescription());
+        id, weight, style, moveType, tier.name().charAt(0), getSkillModifierDescription());
   }
 
   private String getSkillModifierDescription() {
@@ -66,8 +66,8 @@ final class Card {
     return skillModifiers.getOrDefault(skill, 0);
   }
 
-  public Level getLevel() {
-    return level;
+  public Tier getTier() {
+    return tier;
   }
 
   // TODO(constants need checking and could be optimized)

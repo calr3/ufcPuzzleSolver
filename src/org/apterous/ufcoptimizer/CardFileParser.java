@@ -49,7 +49,7 @@ final class CardFileParser {
         ImmutableMap.of(
             Skill.HVMT, parseSkill(parts[5]),
             Skill.THRW, parseSkill(parts[6])),
-        parseLevel(parts[7])
+        parseTier(parts[7])
     );
   }
 
@@ -97,9 +97,9 @@ final class CardFileParser {
     return raw.isEmpty() ? 0 : Integer.parseInt(raw);
   }
 
-  private static Level parseLevel(String raw) {
-    return Arrays.stream(Level.values())
-        .filter(level -> level.name().charAt(0) == raw.charAt(0))
+  private static Tier parseTier(String raw) {
+    return Arrays.stream(Tier.values())
+        .filter(tier -> tier.name().charAt(0) == raw.charAt(0))
         .collect(onlyElement());
   }
 }
