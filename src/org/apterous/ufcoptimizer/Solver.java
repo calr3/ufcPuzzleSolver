@@ -39,7 +39,7 @@ final class Solver {
       // Put a random card in a random slot.
       // TODO: support selecting null as newCard.
       int targetIndex = random.nextInt(puzzle.getMoveSlotCount());
-      Card newCard, oldCard;
+      MoveCard newCard, oldCard;
       if (targetIndex < puzzle.getStrikingSlotCount()) {
         newCard = selection.getRandomUnused(puzzle.getStrikingCards(), random);
         oldCard = selection.setStriking(targetIndex, newCard);

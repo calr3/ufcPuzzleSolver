@@ -16,7 +16,7 @@ import static java.util.stream.Collectors.toList;
 public class Selection {
 
   private final Puzzle puzzle;
-  private final Card[] cards; // TODO: use two arrays.
+  private final MoveCard[] cards; // TODO: use two arrays.
   private final MoveType[] moveSlotTypes;
 
   private final BitSet used;
@@ -27,7 +27,7 @@ public class Selection {
 
   public Selection(Puzzle puzzle) {
     this.puzzle = Preconditions.checkNotNull(puzzle);
-    this.cards = new Card[puzzle.getMoveSlotCount()];
+    this.cards = new MoveCard[puzzle.getMoveSlotCount()];
     // Order can be arbitrary as long as striking slots are first.
     this.moveSlotTypes =
         puzzle.getMoveSlots().stream()
@@ -96,14 +96,14 @@ public class Selection {
         + (isSolved() ? "Solved" : "Unsolved");
   }
 
-  public Card setStriking(int index, Card newCard) {
+  public MoveCard setStriking(int index, MoveCard newCard) {
     Preconditions.checkArgument(index >= 0);
     Preconditions.checkArgument(index < puzzle.getStrikingSlotCount());
     Preconditions.checkArgument(newCard == null || newCard.getMoveType().isStriking());
     return set(index, newCard);
   }
 
-  public Card setGrappling(int index, Card newCard) {
+  public MoveCard setGrappling(int index, MoveCard newCard) {
     Preconditions.checkArgument(index >= 0);
     Preconditions.checkArgument(index < puzzle.getGrapplingSlotCount());
     Preconditions.checkArgument(newCard == null || !newCard.getMoveType().isStriking());
@@ -112,8 +112,8 @@ public class Selection {
 
   // This method is performance-sensitive; it's the main workhorse that solvers
   // will use to iterate and explore the space.
-  private Card set(int index, Card newCard) {
-    Card oldCard = cards[index];
+  private MoveCard set(int index, MoveCard newCard) {
+    MoveCard oldCard = cards[index];
     cards[index] = newCard;
 
     if (oldCard != null) {
@@ -141,17 +141,17 @@ public class Selection {
     return oldCard;
   }
 
-  public boolean isUsed(Card card) {
+  public boolean isUsed(MoveCard card) {
     return used.get(card.getIndex());
   }
 
-  public void setUsed(Card card, boolean isUsed) {
+  public void setUsed(MoveCard card, boolean isUsed) {
     used.set(card.getIndex(), isUsed);
   }
 
-  public Card getRandomUnused(List<Card> cards, Random random) {
+  public MoveCard getRandomUnused(List<MoveCard> cards, Random random) {
     while (true) {
-      Card card = cards.get(random.nextInt(cards.size()));
+      MoveCard card = cards.get(random.nextInt(cards.size()));
       if (!isUsed(card)) {
         return card;
       }

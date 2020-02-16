@@ -9,7 +9,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /** An immutable representation of a card in the game. */
 @Immutable
-final class Card {
+final class MoveCard {
 
   private final int id;
   private final Weight weight;
@@ -19,7 +19,7 @@ final class Card {
   private final ImmutableMap<Skill, Integer> skillModifiers;
   private final Tier tier;
 
-  public Card(
+  public MoveCard(
       int id, Weight weight, Style style, MoveType moveType,
       ImmutableMap<Skill, Integer> skillModifiers, Tier tier) {
     this.id = id;
@@ -32,7 +32,7 @@ final class Card {
 
   @Override
   public boolean equals(Object o) {
-    return (o instanceof Card) && ((Card) o).id == id;
+    return (o instanceof MoveCard) && ((MoveCard) o).id == id;
   }
 
   @Override

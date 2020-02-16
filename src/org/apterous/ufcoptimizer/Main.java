@@ -23,7 +23,7 @@ import java.util.Random;
 public final class Main {
 
   public static void main(String[] args) throws IOException {
-    ImmutableList<Card> cards =
+    ImmutableList<MoveCard> cards =
         new CardFileParser(FileSystems.getDefault().getPath(args[0])).load();
 
     ImmutableList<Puzzle> puzzles = ImmutableList.of(

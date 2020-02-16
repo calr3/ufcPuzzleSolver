@@ -3,7 +3,6 @@ package org.apterous.ufcoptimizer;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultiset;
-import com.google.common.collect.Range;
 import com.google.common.primitives.Ints;
 
 import javax.annotation.concurrent.Immutable;
@@ -15,9 +14,9 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 @Immutable
 final class Puzzle {
 
-  private final ImmutableList<Card> availableCards;
-  private final ImmutableList<Card> strikingCards;
-  private final ImmutableList<Card> grapplingCards;
+  private final ImmutableList<MoveCard> availableCards;
+  private final ImmutableList<MoveCard> strikingCards;
+  private final ImmutableList<MoveCard> grapplingCards;
 
   private final Weight fighterWeight;
   private final Style fighterStyle;
@@ -33,7 +32,7 @@ final class Puzzle {
   private final ImmutableMap<Skill, Integer> initialSkill;
 
   public Puzzle(
-      ImmutableList<Card> availableCards,
+      ImmutableList<MoveCard> availableCards,
       Weight fighterWeight,
       Style fighterStyle,
       ImmutableMultiset<MoveType> moveSlots,
@@ -63,15 +62,15 @@ final class Puzzle {
     this.initialSkill = checkNotNull(initialSkill);
   }
 
-  public ImmutableList<Card> getAvailableCards() {
+  public ImmutableList<MoveCard> getAvailableCards() {
     return availableCards;
   }
 
-  public ImmutableList<Card> getStrikingCards() {
+  public ImmutableList<MoveCard> getStrikingCards() {
     return strikingCards;
   }
 
-  public ImmutableList<Card> getGrapplingCards() {
+  public ImmutableList<MoveCard> getGrapplingCards() {
     return grapplingCards;
   }
 

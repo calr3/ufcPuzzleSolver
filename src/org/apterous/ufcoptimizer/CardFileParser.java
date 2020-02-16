@@ -29,7 +29,7 @@ final class CardFileParser {
    *
    * <p>Indices are contiguous starting from 0.
    */
-  ImmutableList<Card> load() throws IOException {
+  ImmutableList<MoveCard> load() throws IOException {
     AtomicInteger index = new AtomicInteger(0);
     try (Stream<String> lines = Files.lines(filePath)) {
       return lines
@@ -39,9 +39,9 @@ final class CardFileParser {
     }
   }
 
-  private Card parseCard(int index, String line) {
+  private MoveCard parseCard(int index, String line) {
     String[] parts = line.split(",");
-    return new Card(
+    return new MoveCard(
         index,
         parseWeight(parts[1]),
         parseStyle(parts[2]),

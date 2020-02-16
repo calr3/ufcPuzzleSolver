@@ -10,9 +10,7 @@ package org.apterous.ufcoptimizer;
 public enum MoveType {
   ARM {
     @Override
-    public String toString() {
-      return "ARM";
-    }
+    public String toString() { return "ARM"; }
   }, LEG {
     @Override
     public String toString() {
