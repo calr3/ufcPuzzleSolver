@@ -1,15 +1,16 @@
 package org.apterous.ufcoptimizer;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 /** A mutable representation of the cards actually assigned. */
 public class Selection {
@@ -31,7 +32,7 @@ public class Selection {
     this.moveSlotTypes =
         puzzle.getMoveSlots().stream()
             .sorted((slotA, slotB) -> Boolean.compare(slotB.isStriking(), slotA.isStriking()))
-            .collect(Collectors.toList())
+            .collect(toList())
             .toArray(new MoveType[0]);
 
     this.used = new BitSet(puzzle.getAvailableCards().size());
@@ -55,20 +56,27 @@ public class Selection {
 
   @Override
   public String toString() {
-    return String.format("Chem=%2d; %s; %s; %s",
-        chemistry,
-        skillCounter.values().stream()
-            .filter(skill -> !puzzle.getSkillConstraint(skill).acceptsAnything())
-            .map(skill -> String.format("%4s=%3d", skill, skillCounter.get(skill)))
-            .collect(joining("; ")),
-        cardTierCounter.values().stream()
-            .filter(tier -> !puzzle.getCardTierConstraint(tier).acceptsAnything())
-            .map(tier -> String.format("%6s=%2d", tier, cardTierCounter.get(tier)))
-            .collect(joining("; ")),
-        cardStyleCounter.values().stream()
-            .filter(style -> !puzzle.getCardStyleConstraint(style).acceptsAnything())
-            .map(style -> String.format("%3s=%2d", style, cardStyleCounter.get(style)))
-            .collect(joining("; ")));
+    return
+        ImmutableList.<String>builder()
+            .add(String.format("CHEM=%2d", chemistry))
+            .addAll(
+                skillCounter.values().stream()
+                    .filter(skill -> !puzzle.getSkillConstraint(skill).acceptsAnything())
+                    .map(skill -> String.format("%4s=%3d", skill, skillCounter.get(skill)))
+                    .collect(toList()))
+            .addAll(
+                cardTierCounter.values().stream()
+                    .filter(tier -> !puzzle.getCardTierConstraint(tier).acceptsAnything())
+                    .map(tier -> String.format("%6s=%2d", tier, cardTierCounter.get(tier)))
+                    .collect(toList()))
+            .addAll(
+                cardStyleCounter.values().stream()
+                    .filter(style -> !puzzle.getCardStyleConstraint(style).acceptsAnything())
+                    .map(style -> String.format("%3s=%2d", style, cardStyleCounter.get(style)))
+                    .collect(toList()))
+            .build()
+            .stream()
+            .collect(joining("; "));
   }
 
   public String getDescription() {
