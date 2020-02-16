@@ -9,6 +9,8 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static java.util.stream.Collectors.joining;
+
 /** A mutable representation of the cards actually assigned. */
 public class Selection {
 
@@ -19,7 +21,7 @@ public class Selection {
   private final BitSet used;
   private int chemistry;
   private EnumCounter<Skill> skillCounter;
-  private int silvers;
+  private EnumCounter<Tier> cardTierCounter;
 
   public Selection(Puzzle puzzle) {
     this.puzzle = Preconditions.checkNotNull(puzzle);
@@ -34,7 +36,7 @@ public class Selection {
     this.used = new BitSet(puzzle.getAvailableCards().size());
     this.chemistry = 0;
     this.skillCounter = new EnumCounter<>(Skill.values(), puzzle::getInitialSkill);
-    this.silvers = 0;
+    this.cardTierCounter = new EnumCounter<>(Tier.values(), tier -> 0);
   }
 
   public Selection(Selection selection) {
@@ -45,24 +47,27 @@ public class Selection {
     used = (BitSet) selection.used.clone();
     chemistry = selection.chemistry;
     skillCounter = new EnumCounter<>(selection.skillCounter);
-    silvers = selection.silvers;
+    cardTierCounter = new EnumCounter<>(selection.cardTierCounter);
 }
 
   @Override
   public String toString() {
-    return String.format("Chem=%2d; %s; Silv=%d",
+    return String.format("Chem=%2d; %s; %s",
         chemistry,
         skillCounter.values().stream()
             .filter(skill -> skillCounter.get(skill) != 0)
             .map(skill -> String.format("%4s=%3d", skill, skillCounter.get(skill)))
-            .collect(Collectors.joining("; ")),
-        silvers);
+            .collect(joining("; ")),
+        cardTierCounter.values().stream()
+            .filter(tier -> cardTierCounter.get(tier) != 0)
+            .map(tier -> String.format("%6s=%3d", tier, cardTierCounter.get(tier)))
+            .collect(joining("; ")));
   }
 
   public String getDescription() {
     return Arrays.stream(cards)
         .map(card -> card == null ? "___" : String.format("%03d", card.getIndex()))
-        .collect(Collectors.joining(","));
+        .collect(joining(","));
   }
 
   public String getLongDescription() {
@@ -71,7 +76,7 @@ public class Selection {
             cardIndex -> String.format("%s: %s",
                 moveSlotTypes[cardIndex],
                 cards[cardIndex] == null ? "___" : cards[cardIndex].toString()))
-        .collect(Collectors.joining("\n"))
+        .collect(joining("\n"))
         + "\n\n"
         + (isSolved() ? "Solved" : "Unsolved");
   }
@@ -104,7 +109,7 @@ public class Selection {
       for (Skill skill : skillCounter.values()) {
         skillCounter.add(skill, -oldCard.getSkillModifier(skill));
       }
-      silvers -= oldCard.getTier().equals(Tier.SILVER) ? 1 : 0;
+      cardTierCounter.add(oldCard.getTier(), -1);
       setUsed(oldCard,false);
     }
 
@@ -116,7 +121,7 @@ public class Selection {
       for (Skill skill : skillCounter.values()) {
         skillCounter.add(skill, newCard.getSkillModifier(skill));
       }
-      silvers += newCard.getTier().equals(Tier.SILVER) ? 1 : 0;
+      cardTierCounter.add(newCard.getTier(), 1);
       setUsed(newCard, true);
     }
 
@@ -147,8 +152,13 @@ public class Selection {
         return false;
       }
     }
-    return chemistry >= puzzle.getMinimumChemistry() &&
-        silvers <= puzzle.getMaximumSilvers();
+    for (Tier tier : Tier.values()) {
+      if (!puzzle.getCardTierConstraint(tier).isSatisfiedBy(
+          cardTierCounter.get(tier))) {
+        return false;
+      }
+    }
+    return chemistry >= puzzle.getMinimumChemistry();
   }
 
   public double getNaughtiness() {
@@ -162,8 +172,11 @@ public class Selection {
           puzzle.getSkillConstraint(skill).getSatisfactionDistance(
              skillCounter.get(skill)));
     }
-    if (silvers > puzzle.getMaximumSilvers()) {
-      naughtiness += (silvers - puzzle.getMaximumSilvers());
+    for (Tier tier : cardTierCounter.values()) {
+      // TODO: use the negative values more flexibly.
+      naughtiness += Math.max(0,
+          puzzle.getCardTierConstraint(tier).getSatisfactionDistance(
+              cardTierCounter.get(tier)));
     }
     return naughtiness;
   }

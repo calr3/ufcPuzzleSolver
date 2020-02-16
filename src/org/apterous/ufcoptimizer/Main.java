@@ -43,7 +43,8 @@ public final class Main {
             ImmutableMap.of(
                 Skill.HVMT, RangeConstraint.min( 100),
                 Skill.THRW, RangeConstraint.min(95)),
-            1,
+            ImmutableMap.of(
+                Tier.SILVER, RangeConstraint.max(1)),
             ImmutableMap.of(Skill.HVMT, 75, Skill.THRW, 74));
 
     Selection bestSelection =

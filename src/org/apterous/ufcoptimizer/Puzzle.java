@@ -3,6 +3,7 @@ package org.apterous.ufcoptimizer;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultiset;
+import com.google.common.collect.Range;
 import com.google.common.primitives.Ints;
 
 import javax.annotation.concurrent.Immutable;
@@ -27,7 +28,7 @@ final class Puzzle {
 
   private final int minimumChemistry;
   private final ImmutableMap<Skill, RangeConstraint> skillConstraints;
-  private final int maximumSilvers;
+  private final ImmutableMap<Tier, RangeConstraint> cardTierConstraints;
   private final ImmutableMap<Skill, Integer> initialSkill;
 
   public Puzzle(
@@ -37,7 +38,7 @@ final class Puzzle {
       ImmutableMultiset<MoveType> moveSlots,
       int minimumChemistry,
       ImmutableMap<Skill, RangeConstraint> skillConstraints,
-      int maximumSilvers,
+      ImmutableMap<Tier, RangeConstraint> cardTierConstraints,
       ImmutableMap<Skill, Integer> initialSkill) {
     this.availableCards = availableCards;
     strikingCards =
@@ -55,7 +56,7 @@ final class Puzzle {
 
     this.minimumChemistry = minimumChemistry;
     this.skillConstraints = checkNotNull(skillConstraints);
-    this.maximumSilvers = maximumSilvers;
+    this.cardTierConstraints = checkNotNull(cardTierConstraints);
     this.initialSkill = checkNotNull(initialSkill);
   }
 
@@ -103,8 +104,8 @@ final class Puzzle {
     return skillConstraints.getOrDefault(skill, RangeConstraint.UNCONSTRAINED);
   }
 
-  public int getMaximumSilvers() {
-    return maximumSilvers;
+  public RangeConstraint getCardTierConstraint(Tier tier) {
+    return cardTierConstraints.getOrDefault(tier, RangeConstraint.UNCONSTRAINED);
   }
 
   public int getInitialSkill(Skill skill) {
