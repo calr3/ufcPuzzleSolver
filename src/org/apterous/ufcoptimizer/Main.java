@@ -40,8 +40,9 @@ public final class Main {
                 .addCopies(MoveType.GROUND, 2)
                 .build(),
             75,
-            100,
-            95,
+            ImmutableMap.of(
+                Skill.HVMT, RangeConstraint.min( 100),
+                Skill.THRW, RangeConstraint.min(95)),
             1,
             ImmutableMap.of(Skill.HVMT, 75, Skill.THRW, 74));
 

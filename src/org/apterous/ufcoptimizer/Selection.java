@@ -141,9 +141,13 @@ public class Selection {
   }
 
   public boolean isSolved() {
+    for (Skill skill : Skill.values()) {
+      if (!puzzle.getSkillConstraint(skill).isSatisfiedBy(
+          skillCounter.get(skill))) {
+        return false;
+      }
+    }
     return chemistry >= puzzle.getMinimumChemistry() &&
-        skillCounter.get(Skill.HVMT) >= puzzle.getMinimumHeadMovement() &&
-        skillCounter.get(Skill.THRW) >= puzzle.getMinimumThrowSkill() &&
         silvers <= puzzle.getMaximumSilvers();
   }
 
@@ -152,11 +156,11 @@ public class Selection {
     if (chemistry < puzzle.getMinimumChemistry()) {
       naughtiness += puzzle.getMinimumChemistry() - chemistry;
     }
-    if (skillCounter.get(Skill.HVMT) < puzzle.getMinimumHeadMovement()) {
-      naughtiness += puzzle.getMinimumHeadMovement() - skillCounter.get(Skill.HVMT);
-    }
-    if (skillCounter.get(Skill.THRW) < puzzle.getMinimumThrowSkill()) {
-      naughtiness += puzzle.getMinimumThrowSkill() - skillCounter.get(Skill.THRW);
+    for (Skill skill : Skill.values()) {
+      // TODO: use the negative values more flexibly.
+      naughtiness += Math.max(0,
+          puzzle.getSkillConstraint(skill).getSatisfactionDistance(
+             skillCounter.get(skill)));
     }
     if (silvers > puzzle.getMaximumSilvers()) {
       naughtiness += (silvers - puzzle.getMaximumSilvers());

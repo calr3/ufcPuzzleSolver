@@ -26,8 +26,7 @@ final class Puzzle {
   private final int grapplingSlotCount;
 
   private final int minimumChemistry;
-  private final int minimumHeadMovement;
-  private final int minimumThrowSkill;
+  private final ImmutableMap<Skill, RangeConstraint> skillConstraints;
   private final int maximumSilvers;
   private final ImmutableMap<Skill, Integer> initialSkill;
 
@@ -37,7 +36,8 @@ final class Puzzle {
       Style fighterStyle,
       ImmutableMultiset<MoveType> moveSlots,
       int minimumChemistry,
-      int minimumHeadMovement, int minimumThrowSkill, int maximumSilvers,
+      ImmutableMap<Skill, RangeConstraint> skillConstraints,
+      int maximumSilvers,
       ImmutableMap<Skill, Integer> initialSkill) {
     this.availableCards = availableCards;
     strikingCards =
@@ -54,8 +54,7 @@ final class Puzzle {
     this.grapplingSlotCount = moveSlots.size() - strikingSlotCount;
 
     this.minimumChemistry = minimumChemistry;
-    this.minimumHeadMovement = minimumHeadMovement;
-    this.minimumThrowSkill = minimumThrowSkill;
+    this.skillConstraints = checkNotNull(skillConstraints);
     this.maximumSilvers = maximumSilvers;
     this.initialSkill = checkNotNull(initialSkill);
   }
@@ -100,12 +99,8 @@ final class Puzzle {
     return minimumChemistry;
   }
 
-  public int getMinimumHeadMovement() {
-    return minimumHeadMovement;
-  }
-
-  public int getMinimumThrowSkill() {
-    return minimumThrowSkill;
+  public RangeConstraint getSkillConstraint(Skill skill) {
+    return skillConstraints.getOrDefault(skill, RangeConstraint.UNCONSTRAINED);
   }
 
   public int getMaximumSilvers() {
