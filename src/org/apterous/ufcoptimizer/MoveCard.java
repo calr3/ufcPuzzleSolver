@@ -3,11 +3,8 @@ package org.apterous.ufcoptimizer;
 import com.google.common.collect.ImmutableMap;
 
 import javax.annotation.concurrent.Immutable;
-import java.util.stream.Collectors;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-/** An immutable representation of a card in the game. */
+/** An immutable representation of a card representing a move in the game. */
 @Immutable
 final class MoveCard extends Card {
 

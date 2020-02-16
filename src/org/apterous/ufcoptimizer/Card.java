@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+/** An immutable representation of a card in the game. */
 @Immutable
 public class Card {
 
