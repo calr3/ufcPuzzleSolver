@@ -29,6 +29,7 @@ final class Puzzle {
   private final int minimumChemistry;
   private final ImmutableMap<Skill, RangeConstraint> skillConstraints;
   private final ImmutableMap<Tier, RangeConstraint> cardTierConstraints;
+  private final ImmutableMap<Style, RangeConstraint> cardStyleConstraints;
   private final ImmutableMap<Skill, Integer> initialSkill;
 
   public Puzzle(
@@ -39,6 +40,7 @@ final class Puzzle {
       int minimumChemistry,
       ImmutableMap<Skill, RangeConstraint> skillConstraints,
       ImmutableMap<Tier, RangeConstraint> cardTierConstraints,
+      ImmutableMap<Style, RangeConstraint> cardStyleConstraints,
       ImmutableMap<Skill, Integer> initialSkill) {
     this.availableCards = availableCards;
     strikingCards =
@@ -57,6 +59,7 @@ final class Puzzle {
     this.minimumChemistry = minimumChemistry;
     this.skillConstraints = checkNotNull(skillConstraints);
     this.cardTierConstraints = checkNotNull(cardTierConstraints);
+    this.cardStyleConstraints = checkNotNull(cardStyleConstraints);
     this.initialSkill = checkNotNull(initialSkill);
   }
 
@@ -106,6 +109,10 @@ final class Puzzle {
 
   public RangeConstraint getCardTierConstraint(Tier tier) {
     return cardTierConstraints.getOrDefault(tier, RangeConstraint.UNCONSTRAINED);
+  }
+
+  public RangeConstraint getCardStyleConstraint(Style style) {
+    return cardStyleConstraints.getOrDefault(style, RangeConstraint.UNCONSTRAINED);
   }
 
   public int getInitialSkill(Skill skill) {

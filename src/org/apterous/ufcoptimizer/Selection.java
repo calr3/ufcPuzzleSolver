@@ -20,8 +20,9 @@ public class Selection {
 
   private final BitSet used;
   private int chemistry;
-  private EnumCounter<Skill> skillCounter;
-  private EnumCounter<Tier> cardTierCounter;
+  private final EnumCounter<Skill> skillCounter;
+  private final EnumCounter<Tier> cardTierCounter;
+  private final EnumCounter<Style> cardStyleCounter;
 
   public Selection(Puzzle puzzle) {
     this.puzzle = Preconditions.checkNotNull(puzzle);
@@ -37,6 +38,7 @@ public class Selection {
     this.chemistry = 0;
     this.skillCounter = new EnumCounter<>(Skill.values(), puzzle::getInitialSkill);
     this.cardTierCounter = new EnumCounter<>(Tier.values(), tier -> 0);
+    this.cardStyleCounter = new EnumCounter<>(Style.values(), style -> 0);
   }
 
   public Selection(Selection selection) {
@@ -48,19 +50,24 @@ public class Selection {
     chemistry = selection.chemistry;
     skillCounter = new EnumCounter<>(selection.skillCounter);
     cardTierCounter = new EnumCounter<>(selection.cardTierCounter);
-}
+    cardStyleCounter = new EnumCounter<>(selection.cardStyleCounter);
+  }
 
   @Override
   public String toString() {
-    return String.format("Chem=%2d; %s; %s",
+    return String.format("Chem=%2d; %s; %s; %s",
         chemistry,
         skillCounter.values().stream()
-            .filter(skill -> skillCounter.get(skill) != 0)
+            .filter(skill -> !puzzle.getSkillConstraint(skill).acceptsAnything())
             .map(skill -> String.format("%4s=%3d", skill, skillCounter.get(skill)))
             .collect(joining("; ")),
         cardTierCounter.values().stream()
-            .filter(tier -> cardTierCounter.get(tier) != 0)
-            .map(tier -> String.format("%6s=%3d", tier, cardTierCounter.get(tier)))
+            .filter(tier -> !puzzle.getCardTierConstraint(tier).acceptsAnything())
+            .map(tier -> String.format("%6s=%2d", tier, cardTierCounter.get(tier)))
+            .collect(joining("; ")),
+        cardStyleCounter.values().stream()
+            .filter(style -> !puzzle.getCardStyleConstraint(style).acceptsAnything())
+            .map(style -> String.format("%3s=%2d", style, cardStyleCounter.get(style)))
             .collect(joining("; ")));
   }
 
@@ -108,6 +115,7 @@ public class Selection {
         skillCounter.add(skill, -oldCard.getSkillModifier(skill));
       }
       cardTierCounter.add(oldCard.getTier(), -1);
+      cardStyleCounter.add(oldCard.getStyle(), -1);
       setUsed(oldCard,false);
     }
 
@@ -118,6 +126,7 @@ public class Selection {
         skillCounter.add(skill, newCard.getSkillModifier(skill));
       }
       cardTierCounter.add(newCard.getTier(), 1);
+      cardStyleCounter.add(newCard.getStyle(), 1);
       setUsed(newCard, true);
     }
 
@@ -154,6 +163,12 @@ public class Selection {
         return false;
       }
     }
+    for (Style style : cardStyleCounter.values()) {
+      if (!puzzle.getCardStyleConstraint(style).isSatisfiedBy(
+          cardStyleCounter.get(style))) {
+        return false;
+      }
+    }
     return chemistry >= puzzle.getMinimumChemistry();
   }
 
@@ -173,6 +188,12 @@ public class Selection {
       naughtiness += Math.max(0,
           puzzle.getCardTierConstraint(tier).getSatisfactionDistance(
               cardTierCounter.get(tier)));
+    }
+    for (Style style : cardStyleCounter.values()) {
+      // TODO: use the negative values more flexibly.
+      naughtiness += Math.max(0,
+          puzzle.getCardStyleConstraint(style).getSatisfactionDistance(
+              cardStyleCounter.get(style)));
     }
     return naughtiness;
   }

@@ -30,21 +30,21 @@ class RangeConstraint {
   }
 
   /**
-   * Static constructor for {@link RangeConstraint} that only enforces a minimum.
+   * Static constructor for {@link RangeConstraint} that only enforces a minimum (inclusive).
    */
   static RangeConstraint min(int value) {
     return new RangeConstraint(OptionalInt.of(value), OptionalInt.empty());
   }
 
   /**
-   * Static constructor for {@link RangeConstraint} that only enforces a maximum.
+   * Static constructor for {@link RangeConstraint} that only enforces a maximum (inclusive).
    */
   static RangeConstraint max(int value) {
     return new RangeConstraint(OptionalInt.empty(), OptionalInt.of(value));
   }
 
   /**
-   * Static constructor for {@link RangeConstraint} that enforces an upper and lower bound.
+   * Static constructor for {@link RangeConstraint} that enforces an upper and lower bound (both inclusive).
    */
   static RangeConstraint of(int min, int max) {
     return new RangeConstraint(OptionalInt.of(min), OptionalInt.of(max));
@@ -56,6 +56,13 @@ class RangeConstraint {
   boolean isSatisfiedBy(int value) {
     return (!min.isPresent() || value >= min.getAsInt()) &&
         (!max.isPresent() || value <= max.getAsInt());
+  }
+
+  /** Whether there is some int value that can fail these constraints. */
+  boolean acceptsAnything() {
+    return
+        (!min.isPresent() || min.getAsInt() == Integer.MIN_VALUE) &&
+        (!max.isPresent() || max.getAsInt() == Integer.MAX_VALUE);
   }
 
   /**

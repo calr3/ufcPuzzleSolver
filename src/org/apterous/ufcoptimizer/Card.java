@@ -57,6 +57,8 @@ final class Card {
     return id;
   }
 
+  public Style getStyle() { return style; }
+
   public MoveType getMoveType() {
     return moveType;
   }
