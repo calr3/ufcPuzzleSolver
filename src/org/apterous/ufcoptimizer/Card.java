@@ -70,7 +70,6 @@ final class Card {
     return tier;
   }
 
-  // TODO(constants need checking and could be optimized)
   public int getChemistryInSlot(Puzzle puzzle, MoveType slotMoveType) {
     int matches = 0;
     if (weight.equals(puzzle.getFighterWeight())) {

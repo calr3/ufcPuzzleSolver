@@ -82,16 +82,16 @@ public class Selection {
   }
 
   public Card setStriking(int index, Card newCard) {
-    if (index < 0 || index >= puzzle.getStrikingSlotCount() || (newCard != null && !newCard.getMoveType().isStriking())) {
-      throw new IllegalArgumentException();
-    }
+    Preconditions.checkArgument(index >= 0);
+    Preconditions.checkArgument(index < puzzle.getStrikingSlotCount());
+    Preconditions.checkArgument(newCard == null || newCard.getMoveType().isStriking());
     return set(index, newCard);
   }
 
   public Card setGrappling(int index, Card newCard) {
-    if (index < 0 || index >= puzzle.getGrapplingSlotCount() || (newCard != null && newCard.getMoveType().isStriking())) {
-      throw new IllegalArgumentException(String.format("Can't set %s to %s", newCard, index));
-    }
+    Preconditions.checkArgument(index >= 0);
+    Preconditions.checkArgument(index < puzzle.getGrapplingSlotCount());
+    Preconditions.checkArgument(newCard == null || !newCard.getMoveType().isStriking());
     return set(puzzle.getStrikingSlotCount() + index, newCard);
   }
 
@@ -102,9 +102,7 @@ public class Selection {
     cards[index] = newCard;
 
     if (oldCard != null) {
-      if (!isUsed(oldCard)) {
-        throw new IllegalArgumentException();
-      }
+      Preconditions.checkArgument(isUsed(oldCard));
       chemistry -= oldCard.getChemistryInSlot(puzzle, moveSlotTypes[index]);
       for (Skill skill : skillCounter.values()) {
         skillCounter.add(skill, -oldCard.getSkillModifier(skill));
@@ -114,9 +112,7 @@ public class Selection {
     }
 
     if (newCard != null) {
-      if (isUsed(newCard)) {
-        throw new IllegalArgumentException();
-      }
+      Preconditions.checkArgument(!isUsed(newCard));
       chemistry += newCard.getChemistryInSlot(puzzle, moveSlotTypes[index]);
       for (Skill skill : skillCounter.values()) {
         skillCounter.add(skill, newCard.getSkillModifier(skill));
