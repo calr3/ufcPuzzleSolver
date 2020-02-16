@@ -9,67 +9,34 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /** An immutable representation of a card in the game. */
 @Immutable
-final class MoveCard {
+final class MoveCard extends Card {
 
-  private final int id;
   private final Weight weight;
   private final Style style;
   private final MoveType moveType;
 
-  private final ImmutableMap<Skill, Integer> skillModifiers;
-  private final Tier tier;
-
   public MoveCard(
       int id, Weight weight, Style style, MoveType moveType,
       ImmutableMap<Skill, Integer> skillModifiers, Tier tier) {
-    this.id = id;
+    super(id, skillModifiers, tier);
     this.weight = weight;
     this.style = style;
     this.moveType = moveType;
-    this.skillModifiers = skillModifiers;
-    this.tier = tier;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    return (o instanceof MoveCard) && ((MoveCard) o).id == id;
-  }
-
-  @Override
-  public int hashCode() {
-    return id;
   }
 
   @Override
   public String toString() {
     return String.format("%03d:%s:%s:%s:%c:%s",
-        id, weight, style, moveType, tier.name().charAt(0), getSkillModifierDescription());
-  }
-
-  private String getSkillModifierDescription() {
-    return skillModifiers.entrySet().stream()
-        .filter(entry -> !entry.getValue().equals(0))
-        .map(entry -> String.format("%4s=%+d", entry.getKey(), entry.getValue()))
-        .collect(Collectors.joining(","));
-  }
-
-  public int getIndex() {
-    return id;
+        getIndex(),
+        weight, style, moveType,
+        getTier().name().charAt(0),
+        getSkillModifierDescription());
   }
 
   public Style getStyle() { return style; }
 
   public MoveType getMoveType() {
     return moveType;
-  }
-
-  public int getSkillModifier(Skill skill) {
-    checkNotNull(skill);
-    return skillModifiers.getOrDefault(skill, 0);
-  }
-
-  public Tier getTier() {
-    return tier;
   }
 
   public int getChemistryInSlot(Puzzle puzzle, MoveType slotMoveType) {
