@@ -68,7 +68,7 @@ final class CardFileParser {
         parseStyle(parts[2]),
         parseType(parts[3]),
         ImmutableMap.of(
-            Skill.HVMT, parseSkill(parts[5]),
+            Skill.HMVT, parseSkill(parts[5]),
             Skill.THRW, parseSkill(parts[6])),
         parseTier(parts[7])
     );

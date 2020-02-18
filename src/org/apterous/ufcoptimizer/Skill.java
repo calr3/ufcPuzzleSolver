@@ -8,7 +8,7 @@ public enum Skill {
   ACC,
   SWCH,
   BLOK,
-  HVMT,
+  HMVT,
 
   THRW,
   CCON,

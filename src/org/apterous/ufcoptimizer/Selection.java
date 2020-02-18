@@ -24,7 +24,7 @@ public class Selection {
       ImmutableListMultimap.<SummarySkill, Skill>builder()
           .putAll(
               SummarySkill.STRIKING,
-              Skill.SPD, Skill.PWR, Skill.FWRK, Skill.ACC, Skill.SWCH, Skill.BLOK, Skill.HVMT)
+              Skill.SPD, Skill.PWR, Skill.FWRK, Skill.ACC, Skill.SWCH, Skill.BLOK, Skill.HMVT)
           .putAll(
               SummarySkill.GRAPPLING,
               Skill.THRW, Skill.CCON, Skill.TOP, Skill.BOT, Skill.TD, Skill.TDD, Skill.SUBO, Skill.SUBD)

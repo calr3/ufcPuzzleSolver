@@ -50,7 +50,7 @@ public final class Main {
                 .build(),
             6,
             ImmutableMap.of(
-                Skill.HVMT, RangeConstraint.min( 100),
+                Skill.HMVT, RangeConstraint.min( 100),
                 Skill.THRW, RangeConstraint.min(95)),
             ImmutableMap.of(SummarySkill.CHEMISTRY, RangeConstraint.min(75)),
             ImmutableMap.of(
@@ -63,7 +63,7 @@ public final class Main {
                 .put(Skill.ACC, 69)
                 .put(Skill.SWCH, 69)
                 .put(Skill.BLOK, 69)
-                .put(Skill.HVMT, 75)
+                .put(Skill.HMVT, 75)
                 .put(Skill.THRW, 74)
                 .put(Skill.CCON, 79)
                 .put(Skill.TOP, 79)
@@ -108,7 +108,7 @@ public final class Main {
                 .put(Skill.ACC, 72)
                 .put(Skill.SWCH, 77)
                 .put(Skill.BLOK, 79)
-                .put(Skill.HVMT, 81)
+                .put(Skill.HMVT, 81)
                 .put(Skill.THRW, 71)
                 .put(Skill.CCON, 74)
                 .put(Skill.TOP, 69)
@@ -152,7 +152,7 @@ public final class Main {
                 .put(Skill.ACC, 69)
                 .put(Skill.SWCH, 69)
                 .put(Skill.BLOK, 69)
-                .put(Skill.HVMT, 69)
+                .put(Skill.HMVT, 69)
                 .put(Skill.THRW, 79)
                 .put(Skill.CCON, 79)
                 .put(Skill.TOP, 79)
@@ -199,7 +199,7 @@ public final class Main {
                 .put(Skill.ACC, 73)
                 .put(Skill.SWCH, 77)
                 .put(Skill.BLOK, 77)
-                .put(Skill.HVMT, 77)
+                .put(Skill.HMVT, 77)
                 .put(Skill.THRW, 71)
                 .put(Skill.CCON, 71)
                 .put(Skill.TOP, 69)
