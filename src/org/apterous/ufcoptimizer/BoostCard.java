@@ -10,6 +10,7 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 final class BoostCard extends Card {
 
+  // TODO: model usage count. (Not a constraint, but nice to optimize.)
   public BoostCard(
       int id,
       ImmutableMap<Skill, Integer> skillModifiers, Tier tier) {

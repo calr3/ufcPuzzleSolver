@@ -76,19 +76,20 @@ final class CardFileParser {
 
   private BoostCard parseBoostCard(int index, String line) {
     String[] parts = line.split(",");
-    Preconditions.checkArgument(parts.length == 8);
+    Preconditions.checkArgument(parts.length == 11);
     return new BoostCard(
         index,
         ImmutableMap.<Skill, Integer>builder()
-            .put(Skill.GSTA, parseSkill(parts[1]))
-            .put(Skill.SSTA, parseSkill(parts[2]))
-            .put(Skill.END, parseSkill(parts[3]))
-            .put(Skill.TGH, parseSkill(parts[4]))
-            .put(Skill.HART, parseSkill(parts[5]))
-            .put(Skill.CHIN, parseSkill(parts[6]))
-            .put(Skill.LEGS, parseSkill(parts[7]))
+            .put(Skill.GSTA, parseSkill(parts[2]))
+            .put(Skill.SSTA, parseSkill(parts[3]))
+            .put(Skill.END, parseSkill(parts[4]))
+            .put(Skill.TGH, parseSkill(parts[5]))
+            .put(Skill.HART, parseSkill(parts[6]))
+            .put(Skill.BODY, parseSkill(parts[7]))
+            .put(Skill.CHIN, parseSkill(parts[8]))
+            .put(Skill.LEGS, parseSkill(parts[9]))
             .build(),
-        parseTier(parts[0]));
+        parseTier(parts[1]));
   }
 
   private static Weight parseWeight(String raw) {

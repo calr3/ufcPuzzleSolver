@@ -23,7 +23,7 @@ final class MoveCard extends Card {
 
   @Override
   public String toString() {
-    return String.format("%03d:%s:%s:%s:%c:%29s",
+    return String.format("%03d:%s:%s:%s:%c:%-29s",
         getIndex(),
         moveType,
         weight,

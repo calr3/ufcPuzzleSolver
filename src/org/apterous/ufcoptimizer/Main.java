@@ -49,10 +49,10 @@ public final class Main {
                 .addCopies(MoveType.GROUND, 2)
                 .build(),
             6,
-            75,
             ImmutableMap.of(
                 Skill.HVMT, RangeConstraint.min( 100),
                 Skill.THRW, RangeConstraint.min(95)),
+            ImmutableMap.of(SummarySkill.CHEMISTRY, RangeConstraint.min(75)),
             ImmutableMap.of(
                 Tier.SILVER, RangeConstraint.max(1)),
             NO_STYLE_CONSTRAINTS,
@@ -96,8 +96,8 @@ public final class Main {
                 .addCopies(MoveType.GROUND, 1)
                 .build(),
             6,
-            25,
             NO_SKILL_CONSTRAINTS,
+            ImmutableMap.of(SummarySkill.CHEMISTRY, RangeConstraint.min(25)),
             NO_TIER_CONSTRAINTS,
             ImmutableMap.of(
                 Style.SPECIALIST, RangeConstraint.min(2)),
@@ -141,8 +141,8 @@ public final class Main {
                 .addCopies(MoveType.GROUND, 2)
                 .build(),
             6,
-            25,
             ImmutableMap.of(Skill.TGH, RangeConstraint.min(90)),
+            ImmutableMap.of(SummarySkill.CHEMISTRY, RangeConstraint.min(25)),
             NO_TIER_CONSTRAINTS,
             NO_STYLE_CONSTRAINTS,
             ImmutableMap.<Skill, Integer>builder()
@@ -169,6 +169,53 @@ public final class Main {
                 .put(Skill.CHIN, 75)
                 .put(Skill.BODY, 71)
                 .put(Skill.LEGS, 71)
+                .build()),
+        // Pack: UFC 200: Hard. Puzzle 8: Travis Browne: Hard.
+        new Puzzle(
+            cards.availableMoves,
+            cards.availableBoosts,
+            Weight.HW,
+            Style.BRAWLER,
+            ImmutableMultiset.<MoveType>builder()
+                .addCopies(MoveType.ARM, 5)
+                .addCopies(MoveType.LEG, 4)
+                .addCopies(MoveType.CLINCH, 2)
+                .addCopies(MoveType.TAKEDOWN, 2)
+                .addCopies(MoveType.SUBMISSION, 1)
+                .addCopies(MoveType.GROUND, 1)
+                .build(),
+            6,
+            NO_SKILL_CONSTRAINTS,
+            ImmutableMap.of(
+                SummarySkill.CHEMISTRY, RangeConstraint.min(50),
+                SummarySkill.STAMINA, RangeConstraint.min(80)),
+            NO_TIER_CONSTRAINTS,
+            ImmutableMap.of(
+                Style.GRAPPLER, RangeConstraint.min(2)),
+            ImmutableMap.<Skill, Integer>builder()
+                .put(Skill.SPD, 73)
+                .put(Skill.PWR, 80)
+                .put(Skill.FWRK, 77)
+                .put(Skill.ACC, 73)
+                .put(Skill.SWCH, 77)
+                .put(Skill.BLOK, 77)
+                .put(Skill.HVMT, 77)
+                .put(Skill.THRW, 71)
+                .put(Skill.CCON, 71)
+                .put(Skill.TOP, 69)
+                .put(Skill.BOT, 69)
+                .put(Skill.TD, 71)
+                .put(Skill.TDD, 71)
+                .put(Skill.SUBO, 69)
+                .put(Skill.SUBD, 69)
+                .put(Skill.GSTA, 71)
+                .put(Skill.SSTA, 77)
+                .put(Skill.END, 73)
+                .put(Skill.TGH, 79)
+                .put(Skill.HART, 80)
+                .put(Skill.CHIN, 80)
+                .put(Skill.BODY, 79)
+                .put(Skill.LEGS, 79)
                 .build()));
 
     puzzles.stream()

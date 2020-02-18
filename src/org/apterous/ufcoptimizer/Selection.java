@@ -2,6 +2,7 @@ package org.apterous.ufcoptimizer;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Streams;
 
 import java.util.Arrays;
@@ -15,6 +16,25 @@ import static java.util.stream.Collectors.toList;
 
 /** A mutable representation of the cards actually assigned. */
 public class Selection {
+
+  // Map from summary skill to the skills that roll up to them. Generally the value of
+  // a summary skill is the average, rounded down, of the composite skills. However
+  // CHEMISTRY is a special case.
+  private final ImmutableListMultimap<SummarySkill, Skill> SKILLS_BY_SUMMARY =
+      ImmutableListMultimap.<SummarySkill, Skill>builder()
+          .putAll(
+              SummarySkill.STRIKING,
+              Skill.SPD, Skill.PWR, Skill.FWRK, Skill.ACC, Skill.SWCH, Skill.BLOK, Skill.HVMT)
+          .putAll(
+              SummarySkill.GRAPPLING,
+              Skill.THRW, Skill.CCON, Skill.TOP, Skill.BOT, Skill.TD, Skill.TDD, Skill.SUBO, Skill.SUBD)
+          .putAll(
+              SummarySkill.STAMINA,
+              Skill.GSTA, Skill.SSTA, Skill.END)
+          .putAll(
+              SummarySkill.HEALTH,
+              Skill.TGH, Skill.HART, Skill.CHIN, Skill.BODY, Skill.LEGS)
+          .build();
 
   private final Puzzle puzzle;
   private final MoveCard[] cards; // TODO: use two arrays.
@@ -62,7 +82,11 @@ public class Selection {
   public String toString() {
     return
         ImmutableList.<String>builder()
-            .add(String.format("CHEM=%2d", chemistry))
+            .addAll(
+                Arrays.stream(SummarySkill.values())
+                    .filter(skill -> !puzzle.getSummarySkillConstraint(skill).acceptsAnything())
+                    .map(skill -> String.format("%9s=%3d", skill, getSummarySkillValue(skill)))
+                    .collect(toList()))
             .addAll(
                 skillCounter.values().stream()
                     .filter(skill -> !puzzle.getSkillConstraint(skill).acceptsAnything())
@@ -192,6 +216,20 @@ public class Selection {
     }
   }
 
+  public int getSummarySkillValue(SummarySkill summarySkill) {
+    // Chemistry is a special case that is not derived from other attributes.
+    if (summarySkill.equals(SummarySkill.CHEMISTRY)) {
+      return chemistry;
+    }
+
+    ImmutableList<Skill> relevantSkills = SKILLS_BY_SUMMARY.get(summarySkill);
+    int sum = 0;
+    for (Skill skill : relevantSkills) {
+      sum += skillCounter.get(skill);
+    }
+    return sum / relevantSkills.size();
+  }
+
   public boolean isSolved() {
     for (Skill skill : Skill.values()) {
       if (!puzzle.getSkillConstraint(skill).isSatisfiedBy(
@@ -211,14 +249,20 @@ public class Selection {
         return false;
       }
     }
-    return chemistry >= puzzle.getMinimumChemistry();
+    for (SummarySkill summarySkill : SummarySkill.values()) {
+      RangeConstraint constraint = puzzle.getSummarySkillConstraint(summarySkill);
+      // These constraints are sparse so we try to avoid computing the value
+      // unless it's necessary.
+      if (!constraint.acceptsAnything() &&
+          !constraint.isSatisfiedBy(getSummarySkillValue(summarySkill))) {
+        return false;
+      }
+    }
+    return true;
   }
 
   public double getNaughtiness() {
     double naughtiness = 0;
-    if (chemistry < puzzle.getMinimumChemistry()) {
-      naughtiness += puzzle.getMinimumChemistry() - chemistry;
-    }
     for (Skill skill : Skill.values()) {
       // TODO: use the negative values more flexibly.
       naughtiness += Math.max(0,
@@ -236,6 +280,15 @@ public class Selection {
       naughtiness += Math.max(0,
           puzzle.getCardStyleConstraint(style).getSatisfactionDistance(
               cardStyleCounter.get(style)));
+    }
+    for (SummarySkill summarySkill : SummarySkill.values()) {
+      RangeConstraint constraint = puzzle.getSummarySkillConstraint(summarySkill);
+      // These constraints are sparse so we try to avoid computing the value
+      // unless it's necessary.
+      if (!constraint.acceptsAnything()) {
+        naughtiness += Math.max(0,
+            constraint.getSatisfactionDistance(getSummarySkillValue(summarySkill)));
+      }
     }
     return naughtiness;
   }
